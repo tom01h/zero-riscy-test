@@ -34,10 +34,12 @@ module zeroriscy_hex_tb();
    int            fd, i;
    string         str, data;
    int            bytec, rtype;
-   logic [15:0]   addr;
+   logic [17:0]   addr;
+   logic [17:0]   base;
    logic [31:0]   op;
 
    initial begin
+      base = 18'h00000;
       fd = $fopen("loadmem.ihex","r");
       if(fd==0) begin
          $display("ERROR!! loadmem.ihex not found");
@@ -50,10 +52,17 @@ module zeroriscy_hex_tb();
              (bytec == 16 || bytec == 12 || bytec == 8 || bytec == 4)) begin
             for (i=0; i<bytec/4; i = i+1) begin
                void'($sscanf(data, "%08h%s", op, str));
-               DUT.zeroriscy_dp_sram.mem[addr/4+i] = {op[7:0],op[15:8],op[23:16],op[31:24]};
+               DUT.zeroriscy_dp_sram.mem[(base+addr)/4+i] = {op[7:0],op[15:8],op[23:16],op[31:24]};
                data = str;
             end
-         end else if ((rtype==3)|(rtype==4)|(rtype==5)) begin
+         end else if (rtype==4) begin
+            void'($sscanf(data, "%04h%02h", addr, data));
+            if(addr==16'h8010)begin
+               base = 18'h20000;
+            end else begin
+               base = 18'h00000;
+            end
+         end else if ((rtype==3)|(rtype==5)) begin
          end else if (rtype==1) begin
             $display("Running ...");
          end else begin
@@ -70,8 +79,15 @@ module zeroriscy_hex_tb();
 
    always @(posedge clk)begin
       htif_pcr_resp_valid <= DUT.zeroriscy_core.data_req_o & DUT.zeroriscy_core.data_we_o &
-                             ((DUT.zeroriscy_core.data_addr_o == 32'h80001000)|(DUT.zeroriscy_core.data_addr_o == 32'h80003000));
+                             ((DUT.zeroriscy_core.data_addr_o == 32'h80001000)|
+                              (DUT.zeroriscy_core.data_addr_o == 32'h80003000)|
+                              (DUT.zeroriscy_core.data_addr_o == 32'h8011fffc));
       htif_pcr_resp_data <= DUT.zeroriscy_core.data_wdata_o;
+   end
+
+   always @(posedge clk)begin
+      if(DUT.zeroriscy_core.data_req_o & DUT.zeroriscy_core.data_we_o & (DUT.zeroriscy_core.data_addr_o == 32'h9a100000))
+        $write("%s",DUT.zeroriscy_core.data_wdata_o[7:0]);
    end
 
    always @(posedge clk) begin

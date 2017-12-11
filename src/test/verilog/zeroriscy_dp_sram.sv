@@ -34,9 +34,9 @@ module zeroriscy_dp_sram
    // flops
    wire [31:0]    p0_wmask = {{8{p0_be[3]}},{8{p0_be[2]}},{8{p0_be[1]}},{8{p0_be[0]}}};
 
-   wire [28:0]    p0_raddr = p0_addr >> 2;
-   reg [31:0]     p0_reg_raddr;
-   reg [31:0]     p0_reg_req;
+   wire [15:0]    p0_raddr = {(|p0_addr[30:17]),p0_addr[16:2]};
+   reg [15:0]     p0_reg_raddr;
+   reg            p0_reg_req;
 
    always_ff @(posedge clk) begin
       p0_reg_raddr <= p0_raddr;
@@ -53,9 +53,9 @@ module zeroriscy_dp_sram
 
    // p1
 
-   wire [28:0]    p1_raddr = p1_addr >> 2;
-   reg [31:0]     p1_reg_raddr;
-   reg [31:0]     p1_reg_req;
+   wire [15:0]    p1_raddr = {(|p1_addr[30:17]),p1_addr[16:2]};
+   reg [15:0]     p1_reg_raddr;
+   reg            p1_reg_req;
 
    always_ff @(posedge clk) begin
       p1_reg_raddr <= p1_raddr;
