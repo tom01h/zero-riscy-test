@@ -49,7 +49,7 @@ int main(int argc, char **argv, char **env) {
   int  i;
   char str[256];
   char data[64];
-  int  bytec, addr, rtype, op;
+  int  bytec, addr, base, rtype, op;
 
   fd = fopen("./loadmem.ihex","r");
   if( fd == NULL ){
@@ -63,10 +63,17 @@ int main(int argc, char **argv, char **env) {
         (bytec == 16 || bytec == 12 || bytec == 8 || bytec == 4)){
       for(i=0; i<bytec/4; i = i+1){
         sscanf(data, "%8x%s", &op, data);
-        verilator_top->v__DOT__DUT__DOT__zeroriscy_dp_sram__DOT__mem[addr/4+i] =
-          ((op&0x0ff)<<24)|(((op>>8)&0x0ff)<<16)|(((op>>16)&0x0ff)<<8)|((op>>24)&0x0ff);
+        if(base>0x100000){
+          verilator_top->v__DOT__DUT__DOT__zeroriscy_dp_sram__DOT__mem[((base%0x40000)+addr)/4+i] =
+            ((op&0x0ff)<<24)|(((op>>8)&0x0ff)<<16)|(((op>>16)&0x0ff)<<8)|((op>>24)&0x0ff);
+        }else{
+          verilator_top->v__DOT__DUT__DOT__zeroriscy_dp_sram__DOT__imem[addr/4+i] =
+            ((op&0x0ff)<<24)|(((op>>8)&0x0ff)<<16)|(((op>>16)&0x0ff)<<8)|((op>>24)&0x0ff);
+        }
       }
-    }else if ((rtype==3)|(rtype==4)|(rtype==5)){
+    }else if ((rtype==4)){
+      base = (addr%0x20)*0x10000;
+    }else if ((rtype==3)|(rtype==5)){
     }else if (rtype==1){
       printf("Running ...\n");
     }else{

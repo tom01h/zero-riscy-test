@@ -104,6 +104,7 @@ $(OUT_DIR)/%.verilator.vcd: $(MEM_DIR)/%.ihex $(SIM_DIR)/Vzeroriscy_verilator_to
 	cp $< loadmem.ihex
 	$(SIM_DIR)/Vzeroriscy_verilator_top +max-cycles=$(MAX_CYCLES) --vcdfile=$@ > log
 	mv log $@.log
+	mv trace.log $@.trc
 
 $(OUT_DIR)/%.wlf: $(MEM_DIR)/%.ihex $(MODELSIM_DIR)/_vmake
 	mkdir -p output
