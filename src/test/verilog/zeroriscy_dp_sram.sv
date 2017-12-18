@@ -46,7 +46,7 @@ module zeroriscy_dp_sram
       p0_reg_raddr <= p0_raddr;
       p0_reg_req <= p0_req;
       p0_reg_imem <= p0_imem;
-      if (p0_req&p0_we) begin
+      if (p0_req&p0_we&(p0_addr[31:20]==12'h801)) begin
          if(p0_imem)begin
             imem[p0_raddr] <= (imem[p0_raddr] & ~p0_wmask) | (p0_wdata & p0_wmask);
          end else begin

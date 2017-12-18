@@ -9,7 +9,25 @@ int putc(unsigned char c)
   return 0;
 }
 
-int puts(unsigned char *str)
+void putx(unsigned int d)
+{
+  unsigned int rem = d;
+  for(int i=7; i>=0; i--){
+    unsigned int div = 1;
+    for(int j=0; j<i; j++){
+      div *=16;
+    }
+    int c = rem/div;
+    if(c<10){
+      putc('0'+c);
+    }else{
+      putc('a'+c-10);
+    }
+    rem = rem % div;
+  }
+}
+
+int puts(char *str)
 {
   while (*str)
     putc(*(str++));
@@ -18,7 +36,8 @@ int puts(unsigned char *str)
 
 int main(void)
 {
-  puts("Hello !!\nzero riscy world\n");
+  putx(0xabad1dea);
+  puts(" Hello !!\nzero riscy world\n");
   *Endf = 1;
   return 0;
 }

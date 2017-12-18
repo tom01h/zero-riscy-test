@@ -269,11 +269,9 @@ int main(int argc,char *argv[])
           }
         }
         putx(out);
-        putc(',');
-        putc(' ');
-        //puts(", ");
+        puts(", ");
       }
-      putc('\n');
+      puts("\n");
     }
 
     puts("\n");
