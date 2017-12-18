@@ -26,7 +26,7 @@ module zeroriscy_dp_sram
    );
 
    parameter iwords = 4096;
-   parameter nwords = 65536;
+   parameter nwords = 128*1024;
 
    logic [31:0]  imem [iwords-1:0];
    logic [31:0]  mem [nwords-1:0];
@@ -37,8 +37,8 @@ module zeroriscy_dp_sram
    wire [31:0]    p0_wmask = {{8{p0_be[3]}},{8{p0_be[2]}},{8{p0_be[1]}},{8{p0_be[0]}}};
 
    wire           p0_imem = ~p0_addr[20];
-   wire [15:0]    p0_raddr = p0_addr[17:2];
-   reg [15:0]     p0_reg_raddr;
+   wire [16:0]    p0_raddr = p0_addr[18:2];
+   reg [16:0]     p0_reg_raddr;
    reg            p0_reg_req;
    reg            p0_reg_imem;
 
@@ -47,10 +47,11 @@ module zeroriscy_dp_sram
       p0_reg_req <= p0_req;
       p0_reg_imem <= p0_imem;
       if (p0_req&p0_we) begin
-         if(p0_imem)
-           imem[p0_raddr] <= (imem[p0_raddr] & ~p0_wmask) | (p0_wdata & p0_wmask);
-         else
-           mem[p0_raddr] <= (mem[p0_raddr] & ~p0_wmask) | (p0_wdata & p0_wmask);
+         if(p0_imem)begin
+            imem[p0_raddr] <= (imem[p0_raddr] & ~p0_wmask) | (p0_wdata & p0_wmask);
+         end else begin
+            mem[p0_raddr] <= (mem[p0_raddr] & ~p0_wmask) | (p0_wdata & p0_wmask);
+         end
       end
    end
 
@@ -62,8 +63,8 @@ module zeroriscy_dp_sram
    // p1
 
    wire           p1_imem = ~p1_addr[20];
-   wire [15:0]    p1_raddr = p1_addr[17:2];
-   reg [15:0]     p1_reg_raddr;
+   wire [16:0]    p1_raddr = p1_addr[18:2];
+   reg [16:0]     p1_reg_raddr;
    reg            p1_reg_req;
    reg            p1_reg_imem;
 

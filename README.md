@@ -1,4 +1,14 @@
-# zero-riscy isa-test-env
+# zero-riscy test-env
+
+## MEM MAP
+| Address  | Size  | Area        |
+| :-       | :-    | :-          |
+| 80000000 | 16KB  | Instruction |
+| 80100000 | 512KB | Data        |
+| 8017fffc | 1B    | htif        |
+| 9a100000 | 1B    | char out    |
+
+## run puts test
 
 In order to build and test "Hello world",
 ModelSim must be installed and on the path.
@@ -15,6 +25,7 @@ vsim.exe -c work.zeroriscy_hex_tb -lib work -do " \
         run 30ns; quit"
 ```
 
+## run isa test
 In order to build and test zero-riscy using the supplied makefile,  
 ModelSim must be installed and on the path.
 ```

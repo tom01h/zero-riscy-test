@@ -34,8 +34,14 @@ module zeroriscy_verilator_top(
    always @(posedge clk)begin
       htif_pcr_resp_valid <= DUT.zeroriscy_core.data_req_o & DUT.zeroriscy_core.data_we_o &
                              ((DUT.zeroriscy_core.data_addr_o == 32'h80001000)|
-                              (DUT.zeroriscy_core.data_addr_o == 32'h80003000));
+                              (DUT.zeroriscy_core.data_addr_o == 32'h80003000)|
+                              (DUT.zeroriscy_core.data_addr_o == 32'h8017fffc));
       htif_pcr_resp_data <= DUT.zeroriscy_core.data_wdata_o;
+   end
+
+   always @(posedge clk)begin
+      if(DUT.zeroriscy_core.data_req_o & DUT.zeroriscy_core.data_we_o & (DUT.zeroriscy_core.data_addr_o == 32'h9a100000))
+        $write("%s",DUT.zeroriscy_core.data_wdata_o[7:0]);
    end
 
    always @(posedge clk) begin
@@ -74,6 +80,8 @@ module zeroriscy_verilator_top(
    wire [4:0]                    rs3 = {instr[31:27]};
    wire [4:0]                    rd = {instr[11:7]};
    wire                          id_en = DUT.zeroriscy_core.id_stage_i.id_valid_o & DUT.zeroriscy_core.id_stage_i.instr_valid_i;
+   wire [31:0]                   rs1d = DUT.zeroriscy_core.id_stage_i.registers_i.mem[rs1];
+   wire [31:0]                   rs2d = DUT.zeroriscy_core.id_stage_i.registers_i.mem[rs2];
 
    integer                       F_HANDLE;
    initial F_HANDLE = $fopen("trace.log","w");
@@ -82,6 +90,19 @@ module zeroriscy_verilator_top(
          $fwrite(F_HANDLE,"(%04d): PC = %08x, inst = %08x", trace_count, PC, instr);
 `include "zeroriscy_trace.v"
          $fdisplay(F_HANDLE,"");
+      end
+   end
+
+   wire                          we = DUT.zeroriscy_core.id_stage_i.registers_i.we_a_i;
+   wire [4:0]                    wa = DUT.zeroriscy_core.id_stage_i.registers_i.waddr_a_i;
+   wire [31:0]                   wd = DUT.zeroriscy_core.id_stage_i.registers_i.wdata_a_i;
+
+   integer                       W_HANDLE;
+   initial W_HANDLE = $fopen("wb.log","w");
+   always @ (posedge clk) begin
+      if(we)begin
+         $fwrite(W_HANDLE,"(%04d): x%02d <= %08x", trace_count, wa, wd);
+         $fdisplay(W_HANDLE,"");
       end
    end
 endmodule

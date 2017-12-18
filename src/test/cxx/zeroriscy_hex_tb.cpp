@@ -57,13 +57,14 @@ int main(int argc, char **argv, char **env) {
     return -1;
   }
 
+  base=0;
   while(fgets(str, sizeof(str), fd)){
     sscanf(str, ":%2x%4x%2x%s", &bytec, &addr, &rtype, data);
     if(rtype==0 &&
         (bytec == 16 || bytec == 12 || bytec == 8 || bytec == 4)){
       for(i=0; i<bytec/4; i = i+1){
         sscanf(data, "%8x%s", &op, data);
-        if(base>0x100000){
+        if(base&0x100000){
           verilator_top->v__DOT__DUT__DOT__zeroriscy_dp_sram__DOT__mem[((base%0x40000)+addr)/4+i] =
             ((op&0x0ff)<<24)|(((op>>8)&0x0ff)<<16)|(((op>>16)&0x0ff)<<8)|((op>>24)&0x0ff);
         }else{
@@ -72,6 +73,7 @@ int main(int argc, char **argv, char **env) {
         }
       }
     }else if ((rtype==4)){
+      sscanf(data, "%4x%s", &addr, data);
       base = (addr%0x20)*0x10000;
     }else if ((rtype==3)|(rtype==5)){
     }else if (rtype==1){
@@ -91,7 +93,9 @@ int main(int argc, char **argv, char **env) {
     if (main_time % 100 == 50)
       verilator_top->clk = 1;
     verilator_top->eval();
-    tfp->dump(main_time);
+    //    if(main_time>9218000*100){
+    //      tfp->dump(main_time);
+    //    }
     main_time += 50;
   }
   delete verilator_top;

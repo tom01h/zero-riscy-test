@@ -81,7 +81,7 @@ module zeroriscy_hex_tb();
       htif_pcr_resp_valid <= DUT.zeroriscy_core.data_req_o & DUT.zeroriscy_core.data_we_o &
                              ((DUT.zeroriscy_core.data_addr_o == 32'h80001000)|
                               (DUT.zeroriscy_core.data_addr_o == 32'h80003000)|
-                              (DUT.zeroriscy_core.data_addr_o == 32'h8013fffc));
+                              (DUT.zeroriscy_core.data_addr_o == 32'h8017fffc));
       htif_pcr_resp_data <= DUT.zeroriscy_core.data_wdata_o;
    end
 
