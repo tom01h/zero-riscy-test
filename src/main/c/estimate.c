@@ -39,8 +39,15 @@ void putx(unsigned int d)
 
 void putd(int d)
 {
-  int rem = d;
-  for(int i=4; i>=0; i--){
+  int rem;
+  if(d<0){
+    putc('-');
+    rem = -d;
+  }else{
+    putc(' ');
+    rem = d;
+  }
+  for(int i=6; i>=0; i--){
     int div=1;
     for(int j=0; j<i; j++){
       div *=10;
@@ -258,7 +265,7 @@ int main(int argc,char *argv[])
     Norm(32,16,16,pool1out,mean1,norm1out);
     BinActivF(32,16,16,norm1out,activ1out);
 
-    unsigned int out;
+    unsigned int out, out0;
 
     for(int y=0; y<16; y++){
       for(int x=0; x<16; x++){
@@ -275,7 +282,7 @@ int main(int argc,char *argv[])
     }
 
     puts("\n");
-    *Endf = 1;
+    //*Endf = 1;
 
     for(int c=0; c<32; c++){
       for(int y=0; y<18; y++){
@@ -293,6 +300,25 @@ int main(int argc,char *argv[])
     BinPool(32,16,16,conv2out,2,2,pool2out);
     BinNorm(32,8,8,pool2out,mean2,norm2out);
     BinActiv(32,8,8,norm2out,activ2out);
+
+    for(int y=0; y<8; y++){
+      for(int x=0; x<8; x++){
+        out = 0;
+        for(int c=0; c<32; c++){
+          if(activ2out[y][x][c]==-1){
+            out |= 1<<c;
+          }
+        }
+        putx(out);
+        puts(", ");
+      }
+      puts("\n");
+    }
+
+    puts("\n");
+    //*Endf = 1;
+
+
     for(int c=0; c<32; c++){
       for(int y=0; y<10; y++){
         for(int x=0; x<10; x++){
@@ -309,6 +335,31 @@ int main(int argc,char *argv[])
     BinPool(64,8,8,conv3out,2,2,pool3out);
     BinNorm(64,4,4,pool3out,mean3,norm3out);
     BinActiv(64,4,4,norm3out,activ3out);
+
+    for(int y=0; y<4; y++){
+      for(int x=0; x<4; x++){
+        out = 0;
+        out0 = 0;
+        for(int c=0; c<32; c++){
+          if(activ3out[y][x][c]==-1){
+            out |= 1<<c;
+          }
+          if(activ3out[y][x][c+32]==-1){
+            out0 |= 1<<c;
+          }
+        }
+        putx(out);
+        puts(", ");
+        putx(out0);
+        puts(", ");
+      }
+      puts("\n");
+    }
+
+    puts("\n");
+    //*Endf = 1;
+
+
     for(int c=0; c<64; c++){
       for(int y=0; y<4; y++){
         for(int x=0; x<4; x++){
@@ -321,6 +372,15 @@ int main(int argc,char *argv[])
     BinActiv(512,1,1,norm4out,activ4out);
 
     Affine(512,10,activ4out,W5,affine5out);
+
+    for(int x=0; x<10; x++){
+      putd(affine5out[x]);
+      puts(", ");
+    }
+
+    puts("\n");
+    puts("\n");
+    //*Endf = 1;
 
     int result = 0;
     int max = affine5out[0];
@@ -348,5 +408,6 @@ int main(int argc,char *argv[])
   puts("== Pass Count : ");
   putd(pass);
   puts(" ==\n");
+  *Endf = 1;
 
 }
