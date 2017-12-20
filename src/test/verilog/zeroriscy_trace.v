@@ -75,7 +75,7 @@
          if(instr[31:25]==32 && instr[14:12]==5 && instr[6:2]==5'h0E && instr[1:0]==3)
            $fwrite(F_HANDLE," : sraw     x%02d x%02d x%02d", rd, rs1, rs2);
          if(instr[14:12]==0 && instr[6:2]==5'h00 && instr[1:0]==3)
-           $fwrite(F_HANDLE," : lb       x%02d     %6d", rs1, imm12);
+           $fwrite(F_HANDLE," : lb       x%02d x%02d<=(%08x)", rs1, rd, rs1d+imm12);
          if(instr[14:12]==1 && instr[6:2]==5'h00 && instr[1:0]==3)
            $fwrite(F_HANDLE," : lh       x%02d     %6d", rs1, imm12);
          if(instr[14:12]==2 && instr[6:2]==5'h00 && instr[1:0]==3)
@@ -89,7 +89,7 @@
          if(instr[14:12]==6 && instr[6:2]==5'h00 && instr[1:0]==3)
            $fwrite(F_HANDLE," : lwu      x%02d     %6d", rs1, imm12);
          if(instr[14:12]==0 && instr[6:2]==5'h08 && instr[1:0]==3)
-           $fwrite(F_HANDLE," : sb       x%02d x%02d", rs1, rs2);
+           $fwrite(F_HANDLE," : sb       x%02d x%02d (%08x)<=%08x", rs1, rs2, rs1d+immhl, rs2d);
          if(instr[14:12]==1 && instr[6:2]==5'h08 && instr[1:0]==3)
            $fwrite(F_HANDLE," : sh       x%02d x%02d", rs1, rs2);
          if(instr[14:12]==2 && instr[6:2]==5'h08 && instr[1:0]==3)

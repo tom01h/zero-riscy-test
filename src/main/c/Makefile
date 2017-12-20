@@ -18,7 +18,7 @@ OBJS +=
 
 TARGET = estimate
 
-CFLAGS = -Wall -nostdinc -nostdlib -fno-builtin
+CFLAGS = -nostdinc -nostdlib -fno-builtin
 CFLAGS += -I.
 #CFLAGS += -g
 CFLAGS += -O
