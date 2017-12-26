@@ -52,10 +52,12 @@ module zeroriscy_hex_tb();
              (bytec == 16 || bytec == 12 || bytec == 8 || bytec == 4)) begin
             for (i=0; i<bytec/4; i = i+1) begin
                void'($sscanf(data, "%08h%s", op, str));
-               if(base[20])begin
-                 DUT.zeroriscy_dp_sram.mem[(base[17:0]+addr)/4+i] = {op[7:0],op[15:8],op[23:16],op[31:24]};
-               end else begin
+               if(base[20:19]==2'b00)begin
+                 DUT.zeroriscy_dp_sram.bmem[addr/4+i] = {op[7:0],op[15:8],op[23:16],op[31:24]};
+               end else if(base[20:19]==2'b01)begin
                  DUT.zeroriscy_dp_sram.imem[addr/4+i] = {op[7:0],op[15:8],op[23:16],op[31:24]};
+               end else begin
+                 DUT.zeroriscy_dp_sram.dmem[(base[16:0]+addr)/4+i] = {op[7:0],op[15:8],op[23:16],op[31:24]};
                end
                data = str;
             end

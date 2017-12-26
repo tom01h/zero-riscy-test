@@ -7,9 +7,9 @@ MEMORY
     insall(rwx) : o = 0x80000000, l = 0x00004000 /* 16KB */
     ins(rwx)	: o = 0x80000000, l = 0x00004000 /* 16KB */
 
-    datall(rwx) : o = 0x80100000, l = 0x00080000 /* 512KB */
-    dat(rwx)    : o = 0x80100000, l = 0x00080000 /* 512KB */
-    stack(rw)   : o = 0x8017fff0, l = 0x00000000 /* end of RAM */
+    datall(rwx) : o = 0x80100000, l = 0x00020000 /* 128KB */
+    dat(rwx)    : o = 0x80100000, l = 0x00020000 /* 128KB */
+    stack(rw)   : o = 0x8011fff0, l = 0x00000000 /* end of RAM */
 }
 
 SECTIONS
