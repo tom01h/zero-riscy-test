@@ -34,10 +34,27 @@ int puts(char *str)
   return 0;
 }
 
+/*
+int add(int a, int b)
+{
+  return a+b;
+}
+*/
+
+extern int add(int,int);
+
 int main(void)
 {
-  putx(0xabad1dea);
-  puts(" Hello !!\nzero riscy world\n");
+  puts("Hello !!\nzero riscy world\n");
+
+  int a = 10;
+  int b = 15;
+
+  int rslt = add(a,b);
+
+  putx(rslt);
+  puts("\n");
+
   *Endf = 1;
   return 0;
 }
