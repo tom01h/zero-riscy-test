@@ -7,21 +7,42 @@ module zeroriscy_sim_top
 
    // Instruction memory interface
    logic        instr_req;
-   logic        instr_gnt;
-   logic        instr_rvalid;
    logic [31:0] instr_addr;
    logic [31:0] instr_rdata;
+   logic        instr_rvalid;
 
    // Data memory interface
    logic        data_req;
-   logic        data_gnt;
-   logic        data_rvalid;
    logic        data_we;
    logic [3:0]  data_be;
    logic [31:0] data_addr;
    logic [31:0] data_wdata;
    logic [31:0] data_rdata;
-   logic        data_err;
+   logic        data_rvalid;
+
+   // Instruction memory interface
+   logic        is_req;
+   logic        is_we;
+   logic [3:0]  is_be;
+   logic [31:0] is_addr;
+   logic [31:0] is_wdata;
+   logic [31:0] is_rdata;
+
+   // Data memory interface
+   logic        ds_req;
+   logic        ds_we;
+   logic [3:0]  ds_be;
+   logic [31:0] ds_addr;
+   logic [31:0] ds_wdata;
+   logic [31:0] ds_rdata;
+
+   // Data memory interface
+   logic        ss_req;
+   logic        ss_we;
+   logic [3:0]  ss_be;
+   logic [31:0] ss_addr;
+   logic [31:0] ss_wdata;
+   logic [31:0] ss_rdata;
 
    zeroriscy_core
      #(
@@ -87,30 +108,83 @@ module zeroriscy_sim_top
       );
 
 
-   zeroriscy_dp_sram zeroriscy_dp_sram
+   zeroriscy_xbar zeroriscy_xbar
+     (
+      .clk(clk),
+      .resetn(~reset),
+
+      .im_req(instr_req),
+      .im_gnt(instr_gnt),
+      .im_rvalid(instr_rvalid),
+      .im_addr(instr_addr[31:0]),
+      .im_rdata(instr_rdata[31:0]),
+      .im_err(),
+
+      .dm_req(data_req),
+      .dm_gnt(data_gnt),
+      .dm_rvalid(data_rvalid),
+      .dm_we(data_we),
+      .dm_be(data_be[3:0]),
+      .dm_addr(data_addr[31:0]),
+      .dm_wdata(data_wdata[31:0]),
+      .dm_rdata(data_rdata[31:0]),
+      .dm_err(data_err),
+
+      .is_req(is_req),
+      .is_we(is_we),
+      .is_be(is_be),
+      .is_addr(is_addr[31:0]),
+      .is_wdata(is_wdata),
+      .is_rdata(is_rdata[31:0]),
+      .is_err(1'b0),
+
+      .ds_req(ds_req),
+      .ds_we(ds_we),
+      .ds_be(ds_be[3:0]),
+      .ds_addr(ds_addr[31:0]),
+      .ds_wdata(ds_wdata[31:0]),
+      .ds_rdata(ds_rdata[31:0]),
+      .ds_err(1'b0),
+
+      .ss_req(),
+      .ss_we(),
+      .ss_be(),
+      .ss_addr(),
+      .ss_wdata(),
+      .ss_rdata(32'h0),
+      .ss_err(1'b0)
+   );
+
+   zeroriscy_d_sram zeroriscy_d_sram
      (
       .clk(clk),
       .rst_n(~reset),
 
-      .p0_req(data_req),
-      .p0_we(data_we),
-      .p0_be(data_be[3:0]),
-      .p0_addr(data_addr[31:0]),
-      .p0_wdata(data_wdata[31:0]),
-      .p0_rdata(data_rdata[31:0]),
-      .p0_gnt(data_gnt),
-      .p0_rvalid(data_rvalid),
-      .p0_err(data_err),
+      .p_req(ds_req),
+      .p_we(ds_we),
+      .p_be(ds_be[3:0]),
+      .p_addr(ds_addr[31:0]),
+      .p_wdata(ds_wdata[31:0]),
+      .p_rdata(ds_rdata[31:0]),
+      .p_gnt(),
+      .p_rvalid(),
+      .p_err()
+   );
 
-      .p1_req(instr_req),
-      .p1_we(1'b0),
-      .p1_be(4'h0),
-      .p1_addr(instr_addr[31:0]),
-      .p1_wdata(32'h0),
-      .p1_rdata(instr_rdata[31:0]),
-      .p1_gnt(instr_gnt),
-      .p1_rvalid(instr_rvalid),
-      .p1_err()
+   zeroriscy_i_sram zeroriscy_i_sram
+     (
+      .clk(clk),
+      .rst_n(~reset),
+
+      .p_req(is_req),
+      .p_we(is_we),
+      .p_be(is_be[3:0]),
+      .p_addr(is_addr[31:0]),
+      .p_wdata(is_wdata),
+      .p_rdata(is_rdata[31:0]),
+      .p_gnt(),
+      .p_rvalid(),
+      .p_err()
    );
 
 endmodule

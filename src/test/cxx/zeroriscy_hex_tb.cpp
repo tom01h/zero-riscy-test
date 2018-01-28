@@ -65,13 +65,13 @@ int main(int argc, char **argv, char **env) {
       for(i=0; i<bytec/4; i = i+1){
         sscanf(data, "%8x%s", &op, data);
         if(base&0x100000){
-          verilator_top->v__DOT__DUT__DOT__zeroriscy_dp_sram__DOT__dmem[((base%0x40000)+addr)/4+i] =
+          verilator_top->v__DOT__DUT__DOT__zeroriscy_d_sram__DOT__dmem[((base%0x40000)+addr)/4+i] =
             ((op&0x0ff)<<24)|(((op>>8)&0x0ff)<<16)|(((op>>16)&0x0ff)<<8)|((op>>24)&0x0ff);
         } else if(base&0x080000){
-          verilator_top->v__DOT__DUT__DOT__zeroriscy_dp_sram__DOT__imem[addr/4+i] =
+          verilator_top->v__DOT__DUT__DOT__zeroriscy_i_sram__DOT__imem[addr/4+i] =
             ((op&0x0ff)<<24)|(((op>>8)&0x0ff)<<16)|(((op>>16)&0x0ff)<<8)|((op>>24)&0x0ff);
         }else{
-          verilator_top->v__DOT__DUT__DOT__zeroriscy_dp_sram__DOT__bmem[addr/4+i] =
+          verilator_top->v__DOT__DUT__DOT__zeroriscy_i_sram__DOT__bmem[addr/4+i] =
             ((op&0x0ff)<<24)|(((op>>8)&0x0ff)<<16)|(((op>>16)&0x0ff)<<8)|((op>>24)&0x0ff);
         }
       }

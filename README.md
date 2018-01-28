@@ -1,13 +1,16 @@
 # zero-riscy test-env
 
 ## MEM MAP
-| Address  | Size  | Area        |
-| :-       | :-    | :-          |
-| 80000000 | 16KB  | Boot        |
-| 80080000 | 16KB  | Instruction |
-| 80100000 | 128KB | Data        |
-| 8017fffc | 1B    | htif        |
-| 9a100000 | 1B    | char out    |
+|  Address | Real Size | Full Size | Area        |
+|       :- | :-        | :-        | :-          |
+| 00000000 | 0         | 2GB       | DRAM?       |
+| 80000000 | 16KB      | 512KB     | Boot        |
+| 80080000 | 16KB      | 512KB     | Instruction |
+| 80100000 | 128KB     | 1M        | Data        |
+| 80200000 | 0         | ?         | ?           |
+|          |           |           |             |
+| 8017fffc | 1B        | 1B        | htif        |
+| 9a100000 | 1B        | 1B        | char out    |
 
 ## run puts test
 
@@ -24,20 +27,21 @@ cp src/main/c/estimate.ihex loadmem.ihex
 vsim.exe -c work.zeroriscy_hex_tb -lib work -do " \
         add wave -noupdate /zeroriscy_hex_tb/* -recursive; \
         add wave -noupdate /zeroriscy_hex_tb/DUT/zeroriscy_core/id_stage_i/registers_i/mem; \
-        add wave -noupdate /zeroriscy_hex_tb/DUT/zeroriscy_dp_sram/mem; \
         run 30ns; quit"
 ```
 Result
 ```
-abad1dea Hello !!
-zero riscy world
-*** PASSED *** after                 1489 simulation cycles
+# Hello !!
+#
+# zero riscy world
+#
+# *** PASSED *** after                  535 simulation cycles
 ```
 
 ## run estimate test
 
 verilator 3.884 or lator must be installed and on the path.  
-check ```OBJS  = startup.o estimate.o``` line in Makefile
+check ```OBJS  = startup.o estimate.o bnn.o``` line in Makefile
 
 ```
 cd ${zero-riscy-test}/src/main/c
@@ -52,10 +56,10 @@ Result
 
 ```
 Approximate....
--0258598, -0555011, -0176046,  1085366, -1230738,  0751510,  0515738, -0362938,  0093014,  0206960,
-
 == Pass Count :  0000001 ==
-*** PASSED *** after             26725130 simulation cycles
+Approximate....
+-0258598, -0555011, -0176046,  1085366, -1230738,  0751510,  0515738, -0362938,  0093014,  0206960,
+*** PASSED *** after             21762250 simulation cycles
 ```
 
 ## run isa test

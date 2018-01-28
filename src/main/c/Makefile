@@ -13,7 +13,8 @@ OBJDUMP = $(BINDIR)/$(ADDNAME)objdump
 RANLIB  = $(BINDIR)/$(ADDNAME)ranlib
 STRIP   = $(BINDIR)/$(ADDNAME)strip
 
-OBJS  = startup.o estimate.o bnn.o
+#OBJS  = startup.o estimate.o bnn.o
+OBJS  = startup.o main.o
 OBJS += 
 
 TARGET = estimate

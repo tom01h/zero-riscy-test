@@ -2,7 +2,9 @@ SHELL = /bin/bash
 
 include Makefrag
 
-V_SRC_DIR = src/main/zero-riscy
+V_CORE_DIR = src/main/zero-riscy
+
+V_SRC_DIR = src/main/verilog
 
 V_TEST_DIR = src/test/verilog
 
@@ -17,11 +19,12 @@ OUT_DIR = output
 MODELSIM_DIR = work
 
 VLOG = vlog.exe
-VLOG_OPTS = +incdir+$(V_SRC_DIR)/include
+VLOG_OPTS = +incdir+$(V_CORE_DIR)/include
 VLIB = vlib.exe
 VSIM = vsim.exe
 VSIM_OPTS = -c work.zeroriscy_hex_tb -lib work -do " \
 	add wave -noupdate /zeroriscy_hex_tb/* -recursive; \
+	add wave -noupdate /zeroriscy_hex_tb/DUT/zeroriscy_core/id_stage_i/registers_i/mem; \
 	run 30ns; quit"
 
 VERILATOR = verilator
@@ -32,7 +35,7 @@ VERILATOR_OPTS = \
 	-Wno-UNUSED \
 	-Wno-BLKSEQ \
 	--cc \
-	-I$(V_SRC_DIR)/include \
+	-I$(V_CORE_DIR)/include \
 	-I$(V_TEST_DIR) \
 	+1364-2001ext+v \
 	-Wno-fatal \
@@ -46,7 +49,7 @@ MAX_CYCLES = 10000
 
 SIMV_OPTS = -k $(OUT_DIR)/ucli.key -q
 
-DESIGN_SRCS = $(addprefix $(V_SRC_DIR)/, \
+DESIGN_SRCS = $(addprefix $(V_CORE_DIR)/, \
 include/zeroriscy_defines.sv \
 include/zeroriscy_tracer_defines.sv \
 cluster_clock_gating.sv \
@@ -71,9 +74,14 @@ zeroriscy_fetch_fifo.sv \
 zeroriscy_core.sv \
 )
 
+CHIP_SRCS = $(addprefix $(V_SRC_DIR)/, \
+zeroriscy_xbar.v \
+zeroriscy_i_sram.sv \
+zeroriscy_d_sram.sv \
+)
+
 SIM_SRCS = $(addprefix $(V_TEST_DIR)/, \
 zeroriscy_sim_top.sv \
-zeroriscy_dp_sram.sv \
 )
 
 VERILATOR_CPP_TB = $(CXX_TEST_DIR)/zeroriscy_hex_tb.cpp
@@ -82,7 +90,7 @@ VERILATOR_TOP = $(V_TEST_DIR)/zeroriscy_verilator_top.sv
 
 MODELSIM_TOP = $(V_TEST_DIR)/zeroriscy_hex_tb_modelsim.sv
 
-HDRS = $(addprefix $(V_SRC_DIR)/include/, \
+HDRS = $(addprefix $(V_CORE_DIR)/include/, \
 zeroriscy_config.sv \
 )
 
@@ -115,16 +123,16 @@ $(OUT_DIR)/%.wlf: $(MEM_DIR)/%.ihex $(MODELSIM_DIR)/_vmake
 	mv vsim.wlf $@
 	mv trace_core_00_0.log $@.trc
 
-$(SIM_DIR)/Vzeroriscy_verilator_top: $(VERILATOR_TOP) $(SIM_SRCS) $(DESIGN_SRCS) $(HDRS) $(VERILATOR_CPP_TB)
-	$(VERILATOR) $(VERILATOR_OPTS) $(VERILATOR_TOP) $(SIM_SRCS) $(DESIGN_SRCS) --exe ../$(VERILATOR_CPP_TB)
+$(SIM_DIR)/Vzeroriscy_verilator_top: $(VERILATOR_TOP) $(SIM_SRCS) $(CHIP_SRCS) $(DESIGN_SRCS) $(HDRS) $(VERILATOR_CPP_TB)
+	$(VERILATOR) $(VERILATOR_OPTS) $(VERILATOR_TOP) $(SIM_SRCS) $(CHIP_SRCS) $(DESIGN_SRCS) --exe ../$(VERILATOR_CPP_TB)
 	cd sim; make $(VERILATOR_MAKE_OPTS) -f Vzeroriscy_verilator_top.mk Vzeroriscy_verilator_top__ALL.a
 	cd sim; make $(VERILATOR_MAKE_OPTS) -f Vzeroriscy_verilator_top.mk Vzeroriscy_verilator_top
 
 $(MODELSIM_DIR):
 	$(VLIB) $(MODELSIM_DIR)
 
-$(MODELSIM_DIR)/_vmake: $(MODELSIM_TOP) $(SIM_SRCS) $(DESIGN_SRCES) $(HDRS) $(MODELSIM_DIR)
-	$(VLOG) $(VLOG_OPTS) $(MODELSIM_TOP) $(SIM_SRCS) $(DESIGN_SRCS)
+$(MODELSIM_DIR)/_vmake: $(MODELSIM_TOP) $(SIM_SRCS) $(CHIP_SRCS) $(DESIGN_SRCS) $(HDRS) $(MODELSIM_DIR)
+	$(VLOG) $(VLOG_OPTS) $(MODELSIM_TOP) $(SIM_SRCS) $(CHIP_SRCS) $(DESIGN_SRCS)
 
 clean:
 	rm -rf $(SIM_DIR)/* $(OUT_DIR)/* $(MODELSIM_DIR) wlft*

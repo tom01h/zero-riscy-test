@@ -34,8 +34,6 @@ module zeroriscy_dp_sram
    logic [31:0]  dmem [nwords-1:0];
 
    // p0
-
-   // flops
    wire [31:0]    p0_wmask = {{8{p0_be[3]}},{8{p0_be[2]}},{8{p0_be[1]}},{8{p0_be[0]}}};
 
    wire           p0_bmem = (p0_addr[20:19]==2'b00);
@@ -69,6 +67,7 @@ module zeroriscy_dp_sram
    assign p0_err = 1'b0;
 
    // p1
+   wire [31:0]    p1_wmask = {{8{p1_be[3]}},{8{p1_be[2]}},{8{p1_be[1]}},{8{p1_be[0]}}};
 
    wire           p1_bmem = (p1_addr[20:19]==2'b00);
    wire           p1_imem = (p1_addr[20:19]==2'b01);
@@ -83,12 +82,21 @@ module zeroriscy_dp_sram
       p1_reg_req <= p1_req;
       p1_reg_bmem <= p1_bmem;
       p1_reg_imem <= p1_imem;
+      if (p1_req&p1_we&({p1_addr[31:21],1'b1}==12'h801)) begin
+         if(p1_bmem)begin
+            bmem[p1_raddr] <= (bmem[p1_raddr] & ~p1_wmask) | (p1_wdata & p1_wmask);
+         end else if(p1_imem)begin
+            imem[p1_raddr] <= (imem[p1_raddr] & ~p1_wmask) | (p1_wdata & p1_wmask);
+         end else begin
+            dmem[p1_raddr] <= (dmem[p1_raddr] & ~p1_wmask) | (p1_wdata & p1_wmask);
+         end
+      end
    end
 
    assign p1_rdata = (p1_reg_bmem) ? bmem[p1_reg_raddr] :
                      (p1_reg_imem) ? imem[p1_reg_raddr] : dmem[p1_reg_raddr];
    assign p1_gnt = 1'b1;
    assign p1_rvalid = p1_reg_req;
-   assign p1_resp = 1'b0;
+   assign p1_err = 1'b0;
 
 endmodule

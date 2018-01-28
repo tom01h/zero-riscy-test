@@ -1,22 +1,11 @@
 
 module zeroriscy_hex_tb();
 
-//   wire start = (DUT.vscale.pipeline.PCmux.PC_DX==32'h00001a60);
-//   wire stop  = (DUT.vscale.pipeline.PCmux.PC_DX==32'h00001a70);
-
-   localparam hexfile_words = 8192;
-
    reg clk;
    reg reset;
 
    reg [255:0]                reason = 0;
-   reg [1023:0]               loadmem = 0;
-   reg [1023:0]               vpdfile = 0;
-   reg [  63:0]               max_cycles = 0;
    reg [  63:0]               trace_count = 0;
-   integer                    stderr = 32'h80000002;
-
-   reg [127:0]                hexfile [hexfile_words-1:0];
 
    zeroriscy_sim_top DUT
      (
@@ -53,11 +42,11 @@ module zeroriscy_hex_tb();
             for (i=0; i<bytec/4; i = i+1) begin
                void'($sscanf(data, "%08h%s", op, str));
                if(base[20:19]==2'b00)begin
-                 DUT.zeroriscy_dp_sram.bmem[addr/4+i] = {op[7:0],op[15:8],op[23:16],op[31:24]};
+                 DUT.zeroriscy_i_sram.bmem[addr/4+i] = {op[7:0],op[15:8],op[23:16],op[31:24]};
                end else if(base[20:19]==2'b01)begin
-                 DUT.zeroriscy_dp_sram.imem[addr/4+i] = {op[7:0],op[15:8],op[23:16],op[31:24]};
+                 DUT.zeroriscy_i_sram.imem[addr/4+i] = {op[7:0],op[15:8],op[23:16],op[31:24]};
                end else begin
-                 DUT.zeroriscy_dp_sram.dmem[(base[16:0]+addr)/4+i] = {op[7:0],op[15:8],op[23:16],op[31:24]};
+                 DUT.zeroriscy_d_sram.dmem[(base[16:0]+addr)/4+i] = {op[7:0],op[15:8],op[23:16],op[31:24]};
                end
                data = str;
             end
@@ -94,9 +83,6 @@ module zeroriscy_hex_tb();
 
    always @(posedge clk) begin
       trace_count = trace_count + 1;
-
-      if (max_cycles > 0 && trace_count > max_cycles)
-        reason = "timeout";
 
       if (!reset) begin
          if (htif_pcr_resp_valid && htif_pcr_resp_data != 0) begin
