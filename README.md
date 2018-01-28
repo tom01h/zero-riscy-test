@@ -10,7 +10,7 @@
 | 80200000 | 0         | ?         | ?           |
 |          |           |           |             |
 | 8017fffc | 1B        | 1B        | htif        |
-| 9a100000 | 1B        | 1B        | char out    |
+| 9a100008 | 1B        | 1B        | char out    |
 
 ## run puts test
 
@@ -60,6 +60,32 @@ Approximate....
 Approximate....
 -0258598, -0555011, -0176046,  1085366, -1230738,  0751510,  0515738, -0362938,  0093014,  0206960,
 *** PASSED *** after             21762250 simulation cycles
+```
+
+## run kozos boot load test
+
+verilator 3.884 or lator must be installed and on the path.  
+
+```
+cd ${zero-riscy-test}/src/main/kozos/bootload
+make
+cd ${zero-riscy-test}
+make verilator-board-test
+```
+
+Result
+
+```
+cp src/main/kozos/bootload/kzload.ihex loadmem.ihex
+sim/Vzeroriscy_verilator_top --vcdfile=board.vcd
+Running ...
+kzload (kozos boot loader) started.
+kzload> run <- type
+run error!
+kzload> dump <- type
+size: ffffffff
+no data.
+kzload> q <- type
 ```
 
 ## run isa test

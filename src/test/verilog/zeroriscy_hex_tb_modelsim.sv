@@ -1,17 +1,46 @@
 
 module zeroriscy_hex_tb();
 
-   reg clk;
-   reg reset;
+   logic clk;
+   logic reset;
 
-   reg [255:0]                reason = 0;
-   reg [  63:0]               trace_count = 0;
+   logic [255:0] reason = 0;
+   logic [63:0]  trace_count = 0;
+
+   logic         ss_req;
+   logic         ss_we;
+   logic [3:0]   ss_be;
+   logic [31:0]  ss_addr;
+   logic [31:0]  ss_wdata;
+   logic [31:0]  ss_rdata;
 
    zeroriscy_sim_top DUT
      (
       .clk(clk),
-      .reset(reset)
+      .reset(reset),
+      .ss_req(ss_req),
+      .ss_addr(ss_addr[31:0]),
+      .ss_we(ss_we),
+      .ss_be(ss_be[3:0]),
+      .ss_wdata(ss_wdata),
+      .ss_rdata(ss_rdata[31:0])
       );
+
+   uart_sim uart_sim
+     (
+      .clk(clk),
+      .resetn(~reset),
+
+      .req(ss_req & (ss_addr[31:4]==28'h9a10_000)),
+      .addr(ss_addr[31:0]),
+      .we(ss_we),
+      .be(ss_be[3:0]),
+      .wdata(ss_wdata),
+      .rdata(ss_rdata[31:0]),
+      .gnt(),
+      .rvalid(),
+      .err()
+   );
 
    initial begin
       clk = 0;
@@ -77,7 +106,7 @@ module zeroriscy_hex_tb();
    end
 
    always @(posedge clk)begin
-      if(DUT.zeroriscy_core.data_req_o & DUT.zeroriscy_core.data_we_o & (DUT.zeroriscy_core.data_addr_o == 32'h9a100000))
+      if(DUT.zeroriscy_core.data_req_o & DUT.zeroriscy_core.data_we_o & (DUT.zeroriscy_core.data_addr_o == 32'h9a100008))
         $write("%s",DUT.zeroriscy_core.data_wdata_o[7:0]);
    end
 

@@ -45,8 +45,6 @@ VERILATOR_OPTS = \
 
 VERILATOR_MAKE_OPTS = OPT_FAST="-O3"
 
-MAX_CYCLES = 10000
-
 SIMV_OPTS = -k $(OUT_DIR)/ucli.key -q
 
 DESIGN_SRCS = $(addprefix $(V_CORE_DIR)/, \
@@ -78,6 +76,7 @@ CHIP_SRCS = $(addprefix $(V_SRC_DIR)/, \
 zeroriscy_xbar.v \
 zeroriscy_i_sram.sv \
 zeroriscy_d_sram.sv \
+uart_sim.v \
 )
 
 SIM_SRCS = $(addprefix $(V_TEST_DIR)/, \
@@ -104,6 +103,8 @@ verilator-sim: $(SIM_DIR)/Vzeroriscy_verilator_top
 
 verilator-run-asm-tests: $(VERILATOR_VCD_FILES)
 
+verilator-board-test: board.vcd
+
 modelsim-sim: $(MODELSIM_DIR) $(MODELSIM_DIR)/_vmake
 
 modelsim-run-asm-tests: $(MODELSIM_WLF_FILES)
@@ -111,9 +112,13 @@ modelsim-run-asm-tests: $(MODELSIM_WLF_FILES)
 $(OUT_DIR)/%.verilator.vcd: $(MEM_DIR)/%.ihex $(SIM_DIR)/Vzeroriscy_verilator_top
 	mkdir -p output
 	cp $< loadmem.ihex
-	$(SIM_DIR)/Vzeroriscy_verilator_top +max-cycles=$(MAX_CYCLES) --vcdfile=$@ > log
+	$(SIM_DIR)/Vzeroriscy_verilator_top --vcdfile=$@ > log
 	mv log $@.log
 	mv trace.log $@.trc
+
+board.vcd: src/main/kozos/bootload/kzload.ihex $(SIM_DIR)/Vzeroriscy_verilator_top
+	cp src/main/kozos/bootload/kzload.ihex loadmem.ihex
+	$(SIM_DIR)/Vzeroriscy_verilator_top --vcdfile=$@
 
 $(OUT_DIR)/%.wlf: $(MEM_DIR)/%.ihex $(MODELSIM_DIR)/_vmake
 	mkdir -p output

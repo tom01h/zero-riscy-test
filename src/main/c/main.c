@@ -1,4 +1,4 @@
-volatile unsigned char *Data = ((volatile unsigned char *)0x9a100000);
+volatile unsigned char *Data = ((volatile unsigned char *)0x9a100008);
 volatile unsigned char *Endf = ((volatile unsigned char *)0x8017fffc);
 
 int putc(unsigned char c)

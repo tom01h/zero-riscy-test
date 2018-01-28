@@ -6,6 +6,19 @@
 
 #define VCD_PATH_LENGTH 256
 
+vluint64_t eval(vluint64_t main_time, Vzeroriscy_verilator_top* verilator_top, VerilatedVcdC* tfp)
+{
+  verilator_top->clk = 0;
+  verilator_top->eval();
+  tfp->dump(main_time);
+
+  verilator_top->clk = 1;
+  verilator_top->eval();
+  tfp->dump(main_time+50);
+
+  return main_time + 100;
+}
+
 int main(int argc, char **argv, char **env) {
   
   int c;
@@ -89,19 +102,33 @@ int main(int argc, char **argv, char **env) {
   }
 
   vluint64_t main_time = 0;
+  int keyin;
+  system("stty -echo -icanon min 1 time 0"); // echo off
   while (!Verilated::gotFinish()) {
+    // reset
     verilator_top->reset = (main_time < 1000) ? 1 : 0;
-    if (main_time % 100 == 0)
-      verilator_top->clk = 0;
-    if (main_time % 100 == 50)
-      verilator_top->clk = 1;
-    verilator_top->eval();
-    //    if(main_time>9218000*100){
-    //      tfp->dump(main_time);
-    //    }
-    main_time += 50;
+    // if putc
+    if((verilator_top->v__DOT__uart_sim__DOT__req_l)&
+       (verilator_top->v__DOT__uart_sim__DOT__we_l)&
+       (verilator_top->v__DOT__uart_sim__DOT__addr_l==2)){
+      putc((char)verilator_top->v__DOT__uart_sim__DOT__d_l, stdout);
+    }
+    // if getc
+    if((verilator_top->v__DOT__uart_sim__DOT__req_l)&
+       (~verilator_top->v__DOT__uart_sim__DOT__we_l)&
+       (verilator_top->v__DOT__uart_sim__DOT__cnt==0)&
+       (verilator_top->v__DOT__uart_sim__DOT__addr_l==1)){
+      keyin = getc(stdin);
+      if(keyin=='q'){printf("q\n");break;} // finish
+      verilator_top->v__DOT__uart_sim__DOT__dout_o = keyin;
+      verilator_top->v__DOT__uart_sim__DOT__empty_o = 0;
+      verilator_top->v__DOT__uart_sim__DOT__cnt = 3;
+    }
+    // @(negedge clk)
+    main_time = eval(main_time, verilator_top, tfp);
   }
   delete verilator_top;
   tfp->close();
+  system("stty echo -icanon min 1 time 0"); // echo on
   exit(0);
 }

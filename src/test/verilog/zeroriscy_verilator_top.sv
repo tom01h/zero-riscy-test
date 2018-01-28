@@ -1,31 +1,51 @@
 
-module zeroriscy_verilator_top(
-                            input                        clk,
-                            input                        reset
-                            );
+module zeroriscy_verilator_top
+  (
+   input clk,
+   input reset
+   );
 
-   localparam hexfile_words = 8192;
+   logic [255:0] reason = 0;
+   logic [63:0]  trace_count = 0;
 
-   reg [  63:0]               max_cycles;
-   reg [  63:0]               trace_count;
-   reg [255:0]                reason;
-   reg [1023:0]               loadmem;
-   integer                    stderr = 32'h80000002;
+   logic         ss_req;
+   logic         ss_we;
+   logic [3:0]   ss_be;
+   logic [31:0]  ss_addr;
+   logic [31:0]  ss_wdata;
+   logic [31:0]  ss_rdata;
 
-   reg [127:0]                hexfile [hexfile_words-1:0];
+   zeroriscy_sim_top DUT
+     (
+      .clk(clk),
+      .reset(reset),
+      .ss_req(ss_req),
+      .ss_addr(ss_addr[31:0]),
+      .ss_we(ss_we),
+      .ss_be(ss_be[3:0]),
+      .ss_wdata(ss_wdata),
+      .ss_rdata(ss_rdata[31:0])
+      );
 
-   zeroriscy_sim_top DUT(
-                         .clk(clk),
-                         .reset(reset)
-                         );
+   uart_sim uart_sim
+     (
+      .clk(clk),
+      .resetn(~reset),
 
-   reg                        dmy;
-   
+      .req(ss_req & (ss_addr[31:4]==28'h9a10_000)),
+      .addr(ss_addr[31:0]),
+      .we(ss_we),
+      .be(ss_be[3:0]),
+      .wdata(ss_wdata),
+      .rdata(ss_rdata[31:0]),
+      .gnt(),
+      .rvalid(),
+      .err()
+   );
+
    initial begin
       reason = 0;
-      max_cycles = 0;
       trace_count = 0;
-      dmy = $value$plusargs("max-cycles=%d", max_cycles);
    end // initial begin
 
    reg htif_pcr_resp_valid;
@@ -39,16 +59,8 @@ module zeroriscy_verilator_top(
       htif_pcr_resp_data <= DUT.zeroriscy_core.data_wdata_o;
    end
 
-   always @(posedge clk)begin
-      if(DUT.zeroriscy_core.data_req_o & DUT.zeroriscy_core.data_we_o & (DUT.zeroriscy_core.data_addr_o == 32'h9a100000))
-        $write("%s",DUT.zeroriscy_core.data_wdata_o[7:0]);
-   end
-
    always @(posedge clk) begin
       trace_count = trace_count + 1;
-
-      if (max_cycles > 0 && trace_count > max_cycles)
-        reason = "timeout";
 
       if (!reset) begin
          if (htif_pcr_resp_valid && htif_pcr_resp_data != 0) begin
@@ -68,22 +80,22 @@ module zeroriscy_verilator_top(
       end
    end
 
-   wire [31:0]                   instr = DUT.zeroriscy_core.id_stage_i.instr_rdata_i;
-   wire [31:0]                   PC = DUT.zeroriscy_core.id_stage_i.pc_id_i;
-   wire signed [12:0]            bimm = {instr[31],instr[7],instr[30:25],instr[11:8],1'b0};
-   wire signed [11:0]            immhl = {instr[31:25],instr[11:7]};
-   wire signed [11:0]            imm12 = {instr[31:20]};
-   wire signed [11:0]            imm20 = {instr[31:12]};
-   wire signed [11:0]            jimm20 = {instr[31],instr[19:12],instr[20],instr[30:21],1'b0};
-   wire [4:0]                    rs1 = {instr[19:15]};
-   wire [4:0]                    rs2 = {instr[24:20]};
-   wire [4:0]                    rs3 = {instr[31:27]};
-   wire [4:0]                    rd = {instr[11:7]};
-   wire                          id_en = DUT.zeroriscy_core.id_stage_i.id_valid_o & DUT.zeroriscy_core.id_stage_i.instr_valid_i;
-   wire [31:0]                   rs1d = DUT.zeroriscy_core.id_stage_i.registers_i.mem[rs1];
-   wire [31:0]                   rs2d = DUT.zeroriscy_core.id_stage_i.registers_i.mem[rs2];
+   wire [31:0]        instr = DUT.zeroriscy_core.id_stage_i.instr_rdata_i;
+   wire [31:0]        PC = DUT.zeroriscy_core.id_stage_i.pc_id_i;
+   wire signed [12:0] bimm = {instr[31],instr[7],instr[30:25],instr[11:8],1'b0};
+   wire signed [11:0] immhl = {instr[31:25],instr[11:7]};
+   wire signed [11:0] imm12 = {instr[31:20]};
+   wire signed [11:0] imm20 = {instr[31:12]};
+   wire signed [11:0] jimm20 = {instr[31],instr[19:12],instr[20],instr[30:21],1'b0};
+   wire [4:0]         rs1 = {instr[19:15]};
+   wire [4:0]         rs2 = {instr[24:20]};
+   wire [4:0]         rs3 = {instr[31:27]};
+   wire [4:0]         rd = {instr[11:7]};
+   wire               id_en = DUT.zeroriscy_core.id_stage_i.id_valid_o & DUT.zeroriscy_core.id_stage_i.instr_valid_i;
+   wire [31:0]        rs1d = DUT.zeroriscy_core.id_stage_i.registers_i.mem[rs1];
+   wire [31:0]        rs2d = DUT.zeroriscy_core.id_stage_i.registers_i.mem[rs2];
 
-   integer                       F_HANDLE;
+   integer            F_HANDLE;
    initial F_HANDLE = $fopen("trace.log","w");
    always @ (posedge clk) begin
       if(id_en)begin

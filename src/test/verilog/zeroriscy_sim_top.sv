@@ -1,8 +1,15 @@
 
 module zeroriscy_sim_top
   (
-   input clk,
-   input reset
+   input logic         clk,
+   input logic         reset,
+
+   output logic        ss_req,
+   output logic        ss_we,
+   output logic [3:0]  ss_be,
+   output logic [31:0] ss_addr,
+   output logic [31:0] ss_wdata,
+   input logic [31:0]  ss_rdata
    );
 
    // Instruction memory interface
@@ -35,14 +42,6 @@ module zeroriscy_sim_top
    logic [31:0] ds_addr;
    logic [31:0] ds_wdata;
    logic [31:0] ds_rdata;
-
-   // Data memory interface
-   logic        ss_req;
-   logic        ss_we;
-   logic [3:0]  ss_be;
-   logic [31:0] ss_addr;
-   logic [31:0] ss_wdata;
-   logic [31:0] ss_rdata;
 
    zeroriscy_core
      #(
@@ -92,7 +91,7 @@ module zeroriscy_sim_top
       .debug_req_i(1'b0),
       .debug_gnt_o(),
       .debug_rvalid_o(),
-      .debug_addr_i(0),//[14:0]
+      .debug_addr_i(15'h0),//[14:0]
       .debug_we_i(1'b0),
       .debug_wdata_i(0),//[31:0]
       .debug_rdata_o(),//[31:0]
@@ -104,7 +103,7 @@ module zeroriscy_sim_top
       .fetch_enable_i(1'b1),
       .core_busy_o(),
 
-      .ext_perf_counters_i(0)//[N_EXT_PERF_COUNTERS-1:0]
+      .ext_perf_counters_i(2'b00)//[N_EXT_PERF_COUNTERS-1:0]
       );
 
 
@@ -146,12 +145,12 @@ module zeroriscy_sim_top
       .ds_rdata(ds_rdata[31:0]),
       .ds_err(1'b0),
 
-      .ss_req(),
-      .ss_we(),
-      .ss_be(),
-      .ss_addr(),
-      .ss_wdata(),
-      .ss_rdata(32'h0),
+      .ss_req(ss_req),
+      .ss_we(ss_we),
+      .ss_be(ss_be[3:0]),
+      .ss_addr(ss_addr[31:0]),
+      .ss_wdata(ss_wdata[31:0]),
+      .ss_rdata(ss_rdata[31:0]),
       .ss_err(1'b0)
    );
 

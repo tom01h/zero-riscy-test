@@ -1,0 +1,56 @@
+OUTPUT_FORMAT("elf32-littleriscv")
+OUTPUT_ARCH(riscv)
+ENTRY("_start")
+
+MEMORY
+{
+	romall(rx)	: o = 0x80000000, l = 0x00004000 /* 16KB */
+	rom(rx)		: o = 0x80000000, l = 0x00004000 /* 16KB */
+
+	ramall(rwx)	: o = 0x80100000, l = 0x00020000 /* 128KB */
+
+	buffer(rwx)	: o = 0x80108000, l = 0x00010000 /* 64KB */
+	data(rwx)	: o = 0x80118000, l = 0x00008000 /* 32KB */
+	stack(rw)	: o = 0x8011ff00, l = 0x00000000 /* end of RAM */
+}
+
+SECTIONS
+{
+	.text : {
+		_text_start = . ;
+		*(.text)
+		_etext = . ;
+	} > rom
+
+	.rodata : {
+		rodata_start = . ;
+		*(.strings)
+		*(.rodata)
+		*(.rodata.*)
+		erodata = . ;
+	} > rom
+
+	.buffer : {
+		buffer_start = . ;
+	} > buffer
+
+	.data : {
+		data_start = . ;
+		*(.data)
+		edata = . ;
+	} > data AT> rom
+
+	.bss : {
+		bss_start = . ;
+		*(.bss)
+		*(COMMON)
+		ebss = . ;
+	} > data AT> rom
+
+	. = ALIGN(4);
+	_end = . ;
+
+	.stack : {
+		_stack = .;
+	} > stack
+}
