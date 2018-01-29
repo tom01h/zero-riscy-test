@@ -86,7 +86,7 @@ kzload (kozos boot loader) started.
 kzload> load <- type
 XMODEM receive succeeded.
 kzload> run <- type
-starting from entry point: 80001900
+starting from entry point: 80080000
 Hello World!
 > echo aaa <- type
  aaa
