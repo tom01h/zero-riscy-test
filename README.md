@@ -69,6 +69,8 @@ verilator 3.884 or lator must be installed and on the path.
 ```
 cd ${zero-riscy-test}/src/main/kozos/bootload
 make
+cd ${zero-riscy-test}/src/main/kozos/os
+make
 cd ${zero-riscy-test}
 make verilator-board-test
 ```
@@ -77,15 +79,18 @@ Result
 
 ```
 cp src/main/kozos/bootload/kzload.ihex loadmem.ihex
+cp src/main/kozos/os/kozos xmodem.dat
 sim/Vzeroriscy_verilator_top --vcdfile=board.vcd
 Running ...
 kzload (kozos boot loader) started.
+kzload> load <- type
+XMODEM receive succeeded.
 kzload> run <- type
-run error!
-kzload> dump <- type
-size: ffffffff
-no data.
-kzload> q <- type
+starting from entry point: 80001900
+Hello World!
+> echo aaa <- type
+ aaa
+> q
 ```
 
 ## run isa test

@@ -19,6 +19,91 @@ vluint64_t eval(vluint64_t main_time, Vzeroriscy_verilator_top* verilator_top, V
   return main_time + 100;
 }
 
+vluint64_t xmodem(vluint64_t main_time, Vzeroriscy_verilator_top* verilator_top, VerilatedVcdC* tfp)
+{
+  int block, check, num;
+  char buf[128];
+  FILE *fp;
+
+  block = 1;
+  num = 128;
+  fp = fopen("xmodem.dat", "rb");
+
+  //// wait NAK ////
+  while(!((verilator_top->v__DOT__uart_sim__DOT__req_l)&&
+          (verilator_top->v__DOT__uart_sim__DOT__we_l)&&
+          (verilator_top->v__DOT__uart_sim__DOT__addr_l==2)&&
+          (verilator_top->v__DOT__uart_sim__DOT__d_l==0x15))){
+    main_time = eval(main_time, verilator_top, tfp);
+  }
+  while(num==128){
+    //// send SOH ////
+    while(verilator_top->v__DOT__uart_sim__DOT__empty_o==0){
+      main_time = eval(main_time, verilator_top, tfp);
+    }
+    verilator_top->v__DOT__uart_sim__DOT__dout_o = 0x01;
+    verilator_top->v__DOT__uart_sim__DOT__empty_o = 0;
+    //// send block ////
+    while(verilator_top->v__DOT__uart_sim__DOT__empty_o==0){
+      main_time = eval(main_time, verilator_top, tfp);
+    }
+    verilator_top->v__DOT__uart_sim__DOT__dout_o = block;
+    verilator_top->v__DOT__uart_sim__DOT__empty_o = 0;
+    //// send ~block ////
+    while(verilator_top->v__DOT__uart_sim__DOT__empty_o==0){
+      main_time = eval(main_time, verilator_top, tfp);
+    }
+    verilator_top->v__DOT__uart_sim__DOT__dout_o = ~block;
+    verilator_top->v__DOT__uart_sim__DOT__empty_o = 0;
+    num = fread(&buf, 1 ,128 ,fp);
+    check = 0;
+    //// send data ////
+    for(int i=0; i<128; i++){
+      while(verilator_top->v__DOT__uart_sim__DOT__empty_o==0){
+        main_time = eval(main_time, verilator_top, tfp);
+      }
+      if(i<num){
+       verilator_top->v__DOT__uart_sim__DOT__dout_o = buf[i];
+        check += buf[i];
+      }else{
+        verilator_top->v__DOT__uart_sim__DOT__dout_o = 0x1a;
+        check += 0x1a;
+      }
+      verilator_top->v__DOT__uart_sim__DOT__empty_o = 0;
+    }
+    //// send check sum ////
+    while(verilator_top->v__DOT__uart_sim__DOT__empty_o==0){
+      main_time = eval(main_time, verilator_top, tfp);
+    }
+    verilator_top->v__DOT__uart_sim__DOT__dout_o = check;
+    verilator_top->v__DOT__uart_sim__DOT__empty_o = 0;
+    //// wait ACK ////
+    while(!((verilator_top->v__DOT__uart_sim__DOT__req_l)&
+            (verilator_top->v__DOT__uart_sim__DOT__we_l)&
+            (verilator_top->v__DOT__uart_sim__DOT__addr_l==2)&
+            (verilator_top->v__DOT__uart_sim__DOT__d_l==0x06))){
+      main_time = eval(main_time, verilator_top, tfp);
+    }
+    block++;
+  }
+  //// send EOT ////
+  while(verilator_top->v__DOT__uart_sim__DOT__empty_o==0){
+    main_time = eval(main_time, verilator_top, tfp);
+  }
+  verilator_top->v__DOT__uart_sim__DOT__dout_o = 0x04;
+  verilator_top->v__DOT__uart_sim__DOT__empty_o = 0;
+  verilator_top->v__DOT__uart_sim__DOT__cnt = 3;
+  //// wait ACK ////
+  while(!((verilator_top->v__DOT__uart_sim__DOT__req_l)&
+          (verilator_top->v__DOT__uart_sim__DOT__we_l)&
+          (verilator_top->v__DOT__uart_sim__DOT__addr_l==2)&
+          (verilator_top->v__DOT__uart_sim__DOT__d_l==0x06))){
+    main_time = eval(main_time, verilator_top, tfp);
+  }
+
+  return main_time;
+}
+
 int main(int argc, char **argv, char **env) {
   
   int c;
@@ -102,7 +187,7 @@ int main(int argc, char **argv, char **env) {
   }
 
   vluint64_t main_time = 0;
-  int keyin;
+  int keyin, load;
   system("stty -echo -icanon min 1 time 0"); // echo off
   while (!Verilated::gotFinish()) {
     // reset
@@ -123,6 +208,12 @@ int main(int argc, char **argv, char **env) {
       verilator_top->v__DOT__uart_sim__DOT__dout_o = keyin;
       verilator_top->v__DOT__uart_sim__DOT__empty_o = 0;
       verilator_top->v__DOT__uart_sim__DOT__cnt = 3;
+      if(keyin=='l'){load=1;}
+      else if((keyin=='o') &(load==1)){load=2;}
+      else if((keyin=='a') &(load==2)){load=3;}
+      else if((keyin=='d') &(load==3)){load=4;}
+      else if((keyin=='\n')&(load==4)){main_time = xmodem(main_time, verilator_top, tfp);load=0;}
+      else {load=0;}
     }
     // @(negedge clk)
     main_time = eval(main_time, verilator_top, tfp);

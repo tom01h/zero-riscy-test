@@ -116,8 +116,9 @@ $(OUT_DIR)/%.verilator.vcd: $(MEM_DIR)/%.ihex $(SIM_DIR)/Vzeroriscy_verilator_to
 	mv log $@.log
 	mv trace.log $@.trc
 
-board.vcd: src/main/kozos/bootload/kzload.ihex $(SIM_DIR)/Vzeroriscy_verilator_top
+board.vcd: src/main/kozos/bootload/kzload.ihex src/main/kozos/os/kozos $(SIM_DIR)/Vzeroriscy_verilator_top
 	cp src/main/kozos/bootload/kzload.ihex loadmem.ihex
+	cp src/main/kozos/os/kozos xmodem.dat
 	$(SIM_DIR)/Vzeroriscy_verilator_top --vcdfile=$@
 
 $(OUT_DIR)/%.wlf: $(MEM_DIR)/%.ihex $(MODELSIM_DIR)/_vmake
