@@ -80,41 +80,4 @@ module zeroriscy_verilator_top
       end
    end
 
-   wire [31:0]        instr = DUT.zeroriscy_core.id_stage_i.instr_rdata_i;
-   wire [31:0]        PC = DUT.zeroriscy_core.id_stage_i.pc_id_i;
-   wire signed [12:0] bimm = {instr[31],instr[7],instr[30:25],instr[11:8],1'b0};
-   wire signed [11:0] immhl = {instr[31:25],instr[11:7]};
-   wire signed [11:0] imm12 = {instr[31:20]};
-   wire signed [11:0] imm20 = {instr[31:12]};
-   wire signed [11:0] jimm20 = {instr[31],instr[19:12],instr[20],instr[30:21],1'b0};
-   wire [4:0]         rs1 = {instr[19:15]};
-   wire [4:0]         rs2 = {instr[24:20]};
-   wire [4:0]         rs3 = {instr[31:27]};
-   wire [4:0]         rd = {instr[11:7]};
-   wire               id_en = DUT.zeroriscy_core.id_stage_i.id_valid_o & DUT.zeroriscy_core.id_stage_i.instr_valid_i;
-   wire [31:0]        rs1d = DUT.zeroriscy_core.id_stage_i.registers_i.mem[rs1];
-   wire [31:0]        rs2d = DUT.zeroriscy_core.id_stage_i.registers_i.mem[rs2];
-
-   integer            F_HANDLE;
-   initial F_HANDLE = $fopen("trace.log","w");
-   always @ (posedge clk) begin
-      if(id_en)begin
-         $fwrite(F_HANDLE,"(%04d): PC = %08x, inst = %08x", trace_count, PC, instr);
-`include "zeroriscy_trace.v"
-         $fdisplay(F_HANDLE,"");
-      end
-   end
-
-   wire                          we = DUT.zeroriscy_core.id_stage_i.registers_i.we_a_i;
-   wire [4:0]                    wa = DUT.zeroriscy_core.id_stage_i.registers_i.waddr_a_i;
-   wire [31:0]                   wd = DUT.zeroriscy_core.id_stage_i.registers_i.wdata_a_i;
-
-   integer                       W_HANDLE;
-   initial W_HANDLE = $fopen("wb.log","w");
-   always @ (posedge clk) begin
-      if(we)begin
-         $fwrite(W_HANDLE,"(%04d): x%02d <= %08x", trace_count, wa, wd);
-         $fdisplay(W_HANDLE,"");
-      end
-   end
 endmodule

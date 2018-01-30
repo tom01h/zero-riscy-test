@@ -68,6 +68,7 @@ zeroriscy_bnn.sv \
 zeroriscy_prefetch_buffer.sv \
 zeroriscy_register_file.sv \
 zeroriscy_tracer.sv \
+zeroriscy_tracer_verilator.sv \
 zeroriscy_fetch_fifo.sv \
 zeroriscy_core.sv \
 )
@@ -114,7 +115,7 @@ $(OUT_DIR)/%.verilator.vcd: $(MEM_DIR)/%.ihex $(SIM_DIR)/Vzeroriscy_verilator_to
 	cp $< loadmem.ihex
 	$(SIM_DIR)/Vzeroriscy_verilator_top --vcdfile=$@ > log
 	mv log $@.log
-	mv trace.log $@.trc
+	mv trace_core.log $@.trc
 
 board.vcd: src/main/kozos/bootload/kzload.ihex src/main/kozos/os/kozos $(SIM_DIR)/Vzeroriscy_verilator_top
 	cp src/main/kozos/bootload/kzload.ihex loadmem.ihex
