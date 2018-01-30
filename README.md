@@ -12,6 +12,12 @@
 | 8017fffc | 1B        | 1B        | htif        |
 | 9a100008 | 1B        | 1B        | char out    |
 
+## MEM MAP
+Verilator sim option for waveform
+- --vcdfile=```FILENAME```
+- --vcdstart=```STARTTIME```
+- --vcdend=```ENDTIME```
+
 ## run puts test
 
 In order to build and test "Hello world",
@@ -49,7 +55,7 @@ make
 cd ${zero-riscy-test}
 make verilator-sim
 cp src/main/c/estimate.ihex loadmem.ihex
-./sim/Vzeroriscy_verilator_top
+./sim/Vzeroriscy_verilator_top --vcdfile=wave.vcd
 ```
 
 Result

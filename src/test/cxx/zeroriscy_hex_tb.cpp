@@ -6,20 +6,30 @@
 
 #define VCD_PATH_LENGTH 256
 
-vluint64_t eval(vluint64_t main_time, Vzeroriscy_verilator_top* verilator_top, VerilatedVcdC* tfp)
+vluint64_t main_time = 0;
+vluint64_t vcdstart = 0;
+vluint64_t vcdend = 0;
+
+void eval(Vzeroriscy_verilator_top* verilator_top, VerilatedVcdC* tfp)
 {
   verilator_top->clk = 0;
   verilator_top->eval();
-  tfp->dump(main_time);
+  if((main_time>=vcdstart)&((main_time<vcdend)|(vcdend==0)))
+    tfp->dump(main_time);
+
+  main_time += 50;
 
   verilator_top->clk = 1;
   verilator_top->eval();
-  tfp->dump(main_time+50);
+  if((main_time>=vcdstart)&((main_time<vcdend)|(vcdend==0)))
+    tfp->dump(main_time);
 
-  return main_time + 100;
+  main_time += 50;
+
+  return;
 }
 
-vluint64_t xmodem(vluint64_t main_time, Vzeroriscy_verilator_top* verilator_top, VerilatedVcdC* tfp)
+void xmodem(Vzeroriscy_verilator_top* verilator_top, VerilatedVcdC* tfp)
 {
   int block, check, num;
   char buf[128];
@@ -34,24 +44,24 @@ vluint64_t xmodem(vluint64_t main_time, Vzeroriscy_verilator_top* verilator_top,
           (verilator_top->v__DOT__uart_sim__DOT__we_l)&&
           (verilator_top->v__DOT__uart_sim__DOT__addr_l==2)&&
           (verilator_top->v__DOT__uart_sim__DOT__d_l==0x15))){
-    main_time = eval(main_time, verilator_top, tfp);
+    eval(verilator_top, tfp);
   }
   while(num==128){
     //// send SOH ////
     while(verilator_top->v__DOT__uart_sim__DOT__empty_o==0){
-      main_time = eval(main_time, verilator_top, tfp);
+      eval(verilator_top, tfp);
     }
     verilator_top->v__DOT__uart_sim__DOT__dout_o = 0x01;
     verilator_top->v__DOT__uart_sim__DOT__empty_o = 0;
     //// send block ////
     while(verilator_top->v__DOT__uart_sim__DOT__empty_o==0){
-      main_time = eval(main_time, verilator_top, tfp);
+      eval(verilator_top, tfp);
     }
     verilator_top->v__DOT__uart_sim__DOT__dout_o = block;
     verilator_top->v__DOT__uart_sim__DOT__empty_o = 0;
     //// send ~block ////
     while(verilator_top->v__DOT__uart_sim__DOT__empty_o==0){
-      main_time = eval(main_time, verilator_top, tfp);
+      eval(verilator_top, tfp);
     }
     verilator_top->v__DOT__uart_sim__DOT__dout_o = ~block;
     verilator_top->v__DOT__uart_sim__DOT__empty_o = 0;
@@ -60,7 +70,7 @@ vluint64_t xmodem(vluint64_t main_time, Vzeroriscy_verilator_top* verilator_top,
     //// send data ////
     for(int i=0; i<128; i++){
       while(verilator_top->v__DOT__uart_sim__DOT__empty_o==0){
-        main_time = eval(main_time, verilator_top, tfp);
+        eval(verilator_top, tfp);
       }
       if(i<num){
        verilator_top->v__DOT__uart_sim__DOT__dout_o = buf[i];
@@ -73,7 +83,7 @@ vluint64_t xmodem(vluint64_t main_time, Vzeroriscy_verilator_top* verilator_top,
     }
     //// send check sum ////
     while(verilator_top->v__DOT__uart_sim__DOT__empty_o==0){
-      main_time = eval(main_time, verilator_top, tfp);
+      eval(verilator_top, tfp);
     }
     verilator_top->v__DOT__uart_sim__DOT__dout_o = check;
     verilator_top->v__DOT__uart_sim__DOT__empty_o = 0;
@@ -82,13 +92,13 @@ vluint64_t xmodem(vluint64_t main_time, Vzeroriscy_verilator_top* verilator_top,
             (verilator_top->v__DOT__uart_sim__DOT__we_l)&
             (verilator_top->v__DOT__uart_sim__DOT__addr_l==2)&
             (verilator_top->v__DOT__uart_sim__DOT__d_l==0x06))){
-      main_time = eval(main_time, verilator_top, tfp);
+      eval(verilator_top, tfp);
     }
     block++;
   }
   //// send EOT ////
   while(verilator_top->v__DOT__uart_sim__DOT__empty_o==0){
-    main_time = eval(main_time, verilator_top, tfp);
+    eval(verilator_top, tfp);
   }
   verilator_top->v__DOT__uart_sim__DOT__dout_o = 0x04;
   verilator_top->v__DOT__uart_sim__DOT__empty_o = 0;
@@ -98,10 +108,10 @@ vluint64_t xmodem(vluint64_t main_time, Vzeroriscy_verilator_top* verilator_top,
           (verilator_top->v__DOT__uart_sim__DOT__we_l)&
           (verilator_top->v__DOT__uart_sim__DOT__addr_l==2)&
           (verilator_top->v__DOT__uart_sim__DOT__d_l==0x06))){
-    main_time = eval(main_time, verilator_top, tfp);
+    eval(verilator_top, tfp);
   }
 
-  return main_time;
+  return;
 }
 
 int main(int argc, char **argv, char **env) {
@@ -110,15 +120,14 @@ int main(int argc, char **argv, char **env) {
   int digit_optind = 0;
   char vcdfile[VCD_PATH_LENGTH];
 
-  strncpy(vcdfile,"tmp.vcd",VCD_PATH_LENGTH);
-
-
   while (1) {
     int this_option_optind = optind ? optind : 1;
     int option_index = 0;
     static struct option long_options[] = {
-      {"vcdfile", required_argument, 0,  0 },
-      {0,         0,                 0,  0 }
+      {"vcdfile" , required_argument, 0,  'f' },
+      {"vcdstart", required_argument, 0,  's' },
+      {"vcdend"  , required_argument, 0,  'e' },
+      {0,          0,                 0,  0 }
     };
 
     c = getopt_long(argc, argv, "",
@@ -127,9 +136,17 @@ int main(int argc, char **argv, char **env) {
       break;
     
     switch (c) {
-    case 0:
+    case 'f':
       if (optarg)
         strncpy(vcdfile,optarg,VCD_PATH_LENGTH);
+      break;
+    case 's':
+      if (optarg)
+        sscanf(optarg,"%d",&vcdstart);
+      break;
+    case 'e':
+      if (optarg)
+        sscanf(optarg,"%d",&vcdend);
       break;
     default:
       break;
@@ -186,7 +203,6 @@ int main(int argc, char **argv, char **env) {
     }
   }
 
-  vluint64_t main_time = 0;
   int keyin, load;
   system("stty -echo -icanon min 1 time 0"); // echo off
   while (!Verilated::gotFinish()) {
@@ -212,11 +228,11 @@ int main(int argc, char **argv, char **env) {
       else if((keyin=='o') &(load==1)){load=2;}
       else if((keyin=='a') &(load==2)){load=3;}
       else if((keyin=='d') &(load==3)){load=4;}
-      else if((keyin=='\n')&(load==4)){main_time = xmodem(main_time, verilator_top, tfp);load=0;}
+      else if((keyin=='\n')&(load==4)){xmodem(verilator_top, tfp);load=0;}
       else {load=0;}
     }
     // @(negedge clk)
-    main_time = eval(main_time, verilator_top, tfp);
+    eval(verilator_top, tfp);
   }
   delete verilator_top;
   tfp->close();
