@@ -3,6 +3,7 @@
 #include "Vzeroriscy_verilator_top.h"
 #include "verilated.h"
 #include "verilated_vcd_c.h"
+//#include "conio.h" // Windows
 
 #define VCD_PATH_LENGTH 256
 
@@ -118,7 +119,7 @@ int main(int argc, char **argv, char **env) {
   
   int c;
   int digit_optind = 0;
-  char vcdfile[VCD_PATH_LENGTH];
+  char vcdfile[VCD_PATH_LENGTH] = "";
 
   while (1) {
     int this_option_optind = optind ? optind : 1;
@@ -204,7 +205,7 @@ int main(int argc, char **argv, char **env) {
   }
 
   int keyin, load;
-  system("stty -echo -icanon min 1 time 0"); // echo off
+  system("stty -echo -icanon min 1 time 0"); // Unix
   while (!Verilated::gotFinish()) {
     // reset
     verilator_top->reset = (main_time < 1000) ? 1 : 0;
@@ -219,7 +220,9 @@ int main(int argc, char **argv, char **env) {
        (~verilator_top->v__DOT__uart_sim__DOT__we_l)&
        (verilator_top->v__DOT__uart_sim__DOT__cnt==0)&
        (verilator_top->v__DOT__uart_sim__DOT__addr_l==1)){
-      keyin = getc(stdin);
+      keyin = getc(stdin);  // Unix
+      //keyin = getch(); // Windows
+      keyin = (keyin=='\n') ? '\r' : keyin;
       if(keyin=='q'){printf("q\n");break;} // finish
       verilator_top->v__DOT__uart_sim__DOT__dout_o = keyin;
       verilator_top->v__DOT__uart_sim__DOT__empty_o = 0;
@@ -228,7 +231,7 @@ int main(int argc, char **argv, char **env) {
       else if((keyin=='o') &(load==1)){load=2;}
       else if((keyin=='a') &(load==2)){load=3;}
       else if((keyin=='d') &(load==3)){load=4;}
-      else if((keyin=='\n')&(load==4)){xmodem(verilator_top, tfp);load=0;}
+      else if((keyin=='\r')&(load==4)){xmodem(verilator_top, tfp);load=0;}
       else {load=0;}
     }
     // @(negedge clk)
@@ -236,6 +239,6 @@ int main(int argc, char **argv, char **env) {
   }
   delete verilator_top;
   tfp->close();
-  system("stty echo -icanon min 1 time 0"); // echo on
+  system("stty echo -icanon min 1 time 0"); // Unix
   exit(0);
 }
