@@ -3,7 +3,7 @@
 
 #define SERIAL_SCI_NUM 2
 
-#define VSCALE_SCI0 ((volatile struct vscale_sci *)0x00008000)
+#define VSCALE_SCI0 ((volatile struct vscale_sci *)0x9a100010)
 #define VSCALE_SCI1 ((volatile struct vscale_sci *)0x9a100000)
 
 struct vscale_sci {

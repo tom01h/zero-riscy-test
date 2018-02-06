@@ -1,24 +1,27 @@
 # zero-riscy test-env
 
 ## MEM MAP
-|  Address | Real Size | Full Size | Area        |
-|       :- | :-        | :-        | :-          |
-| 00000000 | 0         | 2GB       | DRAM?       |
-| 80000000 | 16KB      | 512KB     | Boot        |
-| 80080000 | 16KB      | 512KB     | Instruction |
-| 80100000 | 128KB     | 1M        | Data        |
-| 80200000 | 0         | ?         | ?           |
-|          |           |           |             |
-| 8017fffc | 1B        | 1B        | htif        |
-| 9a100008 | 1B        | 1B        | char out    |
+|  Address | Real Size | Full Size | Area             |
+|       :- | :-        | :-        | :-               |
+| 00000000 | 0         | 2GB       | DRAM?            |
+| 80000000 | 16KB      | 512KB     | Boot             |
+| 80080000 | 16KB      | 512KB     | Instruction      |
+| 80100000 | 128KB     | 1M        | Data             |
+| 80200000 | 0         | ?         | ?                |
+|          |           |           |                  |
+| 8017fffc | 1B        | 1B        | htif             |
+| 9a100008 | 1B        | 1B        | char out for sim |
+| 9a100010 | 16B       | 16B       | UART for FPGA    |
 
-## MEM MAP
-Verilator sim option for waveform
+## Verilator sim option
+for waveform
 - --vcdfile=```FILENAME```
 - --vcdstart=```STARTTIME```
 - --vcdend=```ENDTIME```
 
-## run puts test
+If verilator 3.882 or earlier, remove "--l2-name v" option in Makefile
+
+## run puts test @ ModelSim
 
 In order to build and test "Hello world",
 ModelSim must be installed and on the path.  
@@ -44,7 +47,7 @@ Result
 # *** PASSED *** after                  535 simulation cycles
 ```
 
-## run estimate test
+## run estimate test @ Verilator
 
 verilator 3.884 or lator must be installed and on the path.  
 check ```OBJS  = startup.o estimate.o bnn.o``` line in Makefile
@@ -55,7 +58,7 @@ make
 cd ${zero-riscy-test}
 make verilator-sim
 cp src/main/c/estimate.ihex loadmem.ihex
-./sim/Vzeroriscy_verilator_top --vcdfile=wave.vcd
+./sim/Vzeroriscy_verilator_top
 ```
 
 Result
@@ -68,9 +71,10 @@ Approximate....
 *** PASSED *** after             21762250 simulation cycles
 ```
 
-## run kozos boot load test
+## run kozos boot load test @ Verilator
 
 verilator 3.884 or lator must be installed and on the path.  
+select UART in defines.h (#define SERIAL_DEFAULT_DEVICE 1) in src/main/kozos/{bootrom,os}
 
 ```
 cd ${zero-riscy-test}/src/main/kozos/bootload
@@ -99,7 +103,32 @@ Hello World!
 > q
 ```
 
+## run kozos boot load test @ ARTY A7 FPGA
+select UART in defines.h (#define SERIAL_DEFAULT_DEVICE 0) in src/main/kozos/{bootrom,os}, and build them.  
+
+### convert rom data
+
+```
+cd ${zero-riscy-test}/src/fpga/verilog/
+./ramcnv.pl ../../main/kozos/bootload/kzload.ihex
+```
+
+### Build, program FPGA
+
+open ```fpga/ARTYA7/project_1/project_1.xpr``` by vivado, and ....
+
+### set serial terminal
+
+```
+19200 bps
+data 8bit
+parity none
+stop 1bit
+flow none
+```
+
 ## run isa test
+### @ ModelSim
 In order to build and test zero-riscy using the supplied makefile,  
 ModelSim must be installed and on the path.
 ```
@@ -108,12 +137,12 @@ make modelsim-sim
 make modelsim-run-asm-tests
 ```
 
+### @ verilator
 or verilator 3.884 or lator must be installed and on the path.
 ```
 cd ${zero-riscy-test}
 make verilator-sim
 make verilator-run-asm-tests
 ```
-If verilator 3.882 or earlier, remove "--l2-name v" option in Makefile
 
 This simulation environment is based on v-scale.
