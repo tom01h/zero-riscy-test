@@ -4,7 +4,7 @@ include Makefrag
 
 V_CORE_DIR = src/main/zero-riscy
 
-V_SRC_DIR = src/main/verilog
+V_SRC_DIR = src/main
 
 V_TEST_DIR = src/test/verilog
 
@@ -74,10 +74,11 @@ zeroriscy_core.sv \
 )
 
 CHIP_SRCS = $(addprefix $(V_SRC_DIR)/, \
-zeroriscy_xbar.v \
-zeroriscy_i_sram.sv \
-zeroriscy_d_sram.sv \
-uart_sim.v \
+verilog/zeroriscy_xbar.v \
+verilog/zeroriscy_i_sram.sv \
+verilog/zeroriscy_d_sram.sv \
+verilog/uart_sim.v \
+core2axi/rtl/core2axi.sv \
 )
 
 SIM_SRCS = $(addprefix $(V_TEST_DIR)/, \

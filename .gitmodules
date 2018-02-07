@@ -1,3 +1,6 @@
 [submodule "src/main/zero-riscy"]
 	path = src/main/zero-riscy
 	url = https://github.com/tom01h/zero-riscy
+[submodule "src/main/core2axi"]
+	path = src/main/core2axi
+	url = https://github.com/pulp-platform/core2axi

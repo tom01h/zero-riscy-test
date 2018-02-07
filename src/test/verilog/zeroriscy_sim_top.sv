@@ -1,15 +1,52 @@
 
 module zeroriscy_sim_top
   (
-   input logic         clk,
-   input logic         reset,
+   input logic        clk,
+   input logic        reset,
 
-   output logic        ss_req,
-   output logic        ss_we,
-   output logic [3:0]  ss_be,
-   output logic [31:0] ss_addr,
-   output logic [31:0] ss_wdata,
-   input logic [31:0]  ss_rdata
+   ////////////////////////////////////////////////////////////////////////////
+   // Master Interface Write Address
+   output wire [31:0] M_AXI_AWADDR,
+   output wire [7:0]  M_AXI_AWLEN,
+   output wire [2:0]  M_AXI_AWSIZE,
+   output wire [1:0]  M_AXI_AWBURST,
+   output wire [3:0]  M_AXI_AWCACHE,
+
+   output wire        M_AXI_AWVALID,
+   input wire         M_AXI_AWREADY,
+
+   ////////////////////////////////////////////////////////////////////////////
+   // Master Interface Write Data
+   output wire [31:0] M_AXI_WDATA,
+   output wire [3:0]  M_AXI_WSTRB,
+   output wire        M_AXI_WLAST,
+   output wire        M_AXI_WVALID,
+   input wire         M_AXI_WREADY,
+
+   ////////////////////////////////////////////////////////////////////////////
+   // Master Interface Write Response
+   input wire [1:0]   M_AXI_BRESP,
+   input wire         M_AXI_BVALID,
+   output wire        M_AXI_BREADY,
+
+   ////////////////////////////////////////////////////////////////////////////
+   // Master Interface Read Address
+   output wire [31:0] M_AXI_ARADDR,
+   output wire [7:0]  M_AXI_ARLEN,
+   output wire [2:0]  M_AXI_ARSIZE,
+   output wire [1:0]  M_AXI_ARBURST,
+   output wire [3:0]  M_AXI_ARCACHE,
+
+   output wire        M_AXI_ARVALID,
+   input wire         M_AXI_ARREADY,
+
+   ////////////////////////////////////////////////////////////////////////////
+   // Master Interface Read Data
+   input wire [31:0]  M_AXI_RDATA,
+   input wire [1:0]   M_AXI_RRESP,
+   input wire         M_AXI_RLAST,
+   input wire         M_AXI_RVALID,
+   output wire        M_AXI_RREADY
    );
 
    // Instruction memory interface
@@ -42,6 +79,14 @@ module zeroriscy_sim_top
    logic [31:0] ds_addr;
    logic [31:0] ds_wdata;
    logic [31:0] ds_rdata;
+
+   // System interface
+   logic        ss_req;
+   logic        ss_we;
+   logic [3:0]  ss_be;
+   logic [31:0] ss_addr;
+   logic [31:0] ss_wdata;
+   logic [31:0] ss_rdata;
 
    zeroriscy_core
      #(
@@ -184,6 +229,93 @@ module zeroriscy_sim_top
       .p_gnt(),
       .p_rvalid(),
       .p_err()
-   );
+      );
+
+   core2axi
+     #(
+       .AXI4_ADDRESS_WIDTH(32),
+       .AXI4_RDATA_WIDTH(32),
+       .AXI4_WDATA_WIDTH(32),
+       .AXI4_ID_WIDTH(1),
+       .AXI4_USER_WIDTH(1),
+       .REGISTERED_GRANT("FALSE") // "TRUE"|"FALSE"
+       )
+   core2axi
+     (
+      // Clock and Reset
+      .clk_i(clk),
+      .rst_ni(~reset),
+
+      .data_req_i(ss_req),
+      .data_gnt_o(),
+      .data_rvalid_o(),
+      .data_addr_i(ss_addr[31:0]),
+      .data_we_i(ss_we),
+      .data_be_i(ss_be[3:0]),
+      .data_rdata_o(ss_rdata[31:0]),
+      .data_wdata_i(ss_wdata[31:0]),
+
+      // -----------------------------------
+      // AXI TARG Port Declarations --------
+      // -----------------------------------
+      //AXI write address bus --------------
+      .aw_id_o(),
+      .aw_addr_o(M_AXI_AWADDR[31:0]),
+      .aw_len_o(M_AXI_AWLEN[7:0]),
+      .aw_size_o(M_AXI_AWSIZE[2:0]),
+      .aw_burst_o(M_AXI_AWBURST[1:0]),
+      .aw_lock_o(),
+      .aw_cache_o(M_AXI_AWCACHE[3:0]),
+      .aw_prot_o(),
+      .aw_region_o(),
+      .aw_user_o(),
+      .aw_qos_o(),
+      .aw_valid_o(M_AXI_AWVALID),
+      .aw_ready_i(M_AXI_AWREADY),
+      // -----------------------------------
+
+      //AXI write data bus -----------------
+      .w_data_o(M_AXI_WDATA[31:0]),
+      .w_strb_o(M_AXI_WSTRB[3:0]),
+      .w_last_o(M_AXI_WLAST),
+      .w_user_o(),
+      .w_valid_o(M_AXI_WVALID),
+      .w_ready_i(M_AXI_WREADY),
+      // -----------------------------------
+
+      //AXI write response bus -------------
+      .b_id_i(),
+      .b_resp_i(M_AXI_BRESP[1:0]),
+      .b_valid_i(M_AXI_BVALID),
+      .b_user_i(),
+      .b_ready_o(M_AXI_BREADY),
+      // -----------------------------------
+
+      //AXI read address bus ---------------
+      .ar_id_o(),
+      .ar_addr_o(M_AXI_ARADDR[31:0]),
+      .ar_len_o(M_AXI_ARLEN[7:0]),
+      .ar_size_o(M_AXI_ARSIZE[2:0]),
+      .ar_burst_o(M_AXI_ARBURST[1:0]),
+      .ar_lock_o(),
+      .ar_cache_o(M_AXI_ARCACHE[3:0]),
+      .ar_prot_o(),
+      .ar_region_o(),
+      .ar_user_o(),
+      .ar_qos_o(),
+      .ar_valid_o(M_AXI_ARVALID),
+      .ar_ready_i(M_AXI_ARREADY),
+      // -----------------------------------
+
+      //AXI read data bus ------------------
+      .r_id_i(),
+      .r_data_i(M_AXI_RDATA[31:0]),
+      .r_resp_i(M_AXI_RRESP[1:0]),
+      .r_last_i(M_AXI_RLAST),
+      .r_user_i(),
+      .r_valid_i(M_AXI_RVALID),
+      .r_ready_o(M_AXI_RREADY)
+      // ---------------------------------------------------------
+      );
 
 endmodule
