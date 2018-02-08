@@ -43,6 +43,8 @@ module zeroriscy_xbar
    output [31:0] ss_addr,
    output [31:0] ss_wdata,
    input [31:0]  ss_rdata,
+   input         ss_gnt,
+   input         ss_rvalid,
    input         ss_err
    );
 
@@ -84,13 +86,13 @@ module zeroriscy_xbar
    assign ss_wdata    = (~dm_reqi[2]) ? 32'h0   : dm_wdata;
    
    assign im_rdata  = (im_req_l[2]) ? ss_rdata : (im_req_l[1]) ? ds_rdata : is_rdata;
-   assign im_gnt    = ~|(im_reqi& dm_reqi);
-   assign im_rvalid =  |(im_req_l&~dm_req_l);
+   assign im_gnt    = (im_reqi[2]) ? (ss_gnt&~dm_reqi[2]) : ~|(im_reqi[1:0]& dm_reqi[1:0]);
+   assign im_rvalid =  |{im_req_l[2]&~dm_req_l[2]&ss_rvalid,(im_req_l[1:0]&~dm_req_l[1:0])};
    assign im_err    = (im_req_l[2]) ? ss_err   : (im_req_l[1]) ? ds_err   : is_err;
 
    assign dm_rdata  = (dm_req_l[2]) ? ss_rdata : (dm_req_l[1]) ? ds_rdata : is_rdata;
-   assign dm_gnt    = 1'b1;
-   assign dm_rvalid =  |(dm_req_l);
+   assign dm_gnt    = (dm_reqi[2]) ? ss_gnt : 1'b1;
+   assign dm_rvalid =  |{dm_req_l[2]&ss_rvalid,dm_req_l[1:0]};
    assign dm_err    = (dm_req_l[2]) ? ss_err   : (dm_req_l[1]) ? ds_err   : is_err;
    
 endmodule

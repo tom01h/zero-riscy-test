@@ -87,6 +87,8 @@ module zeroriscy_sim_top
    logic [31:0] ss_addr;
    logic [31:0] ss_wdata;
    logic [31:0] ss_rdata;
+   logic        ss_gnt;
+   logic        ss_rvalid;
 
    zeroriscy_core
      #(
@@ -196,6 +198,8 @@ module zeroriscy_sim_top
       .ss_addr(ss_addr[31:0]),
       .ss_wdata(ss_wdata[31:0]),
       .ss_rdata(ss_rdata[31:0]),
+      .ss_gnt(ss_gnt),
+      .ss_rvalid(ss_rvalid),
       .ss_err(1'b0)
    );
 
@@ -238,7 +242,7 @@ module zeroriscy_sim_top
        .AXI4_WDATA_WIDTH(32),
        .AXI4_ID_WIDTH(1),
        .AXI4_USER_WIDTH(1),
-       .REGISTERED_GRANT("FALSE") // "TRUE"|"FALSE"
+       .REGISTERED_GRANT("TRUE") // "TRUE"|"FALSE"
        )
    core2axi
      (
@@ -247,8 +251,8 @@ module zeroriscy_sim_top
       .rst_ni(~reset),
 
       .data_req_i(ss_req),
-      .data_gnt_o(),
-      .data_rvalid_o(),
+      .data_gnt_o(ss_gnt),
+      .data_rvalid_o(ss_rvalid),
       .data_addr_i(ss_addr[31:0]),
       .data_we_i(ss_we),
       .data_be_i(ss_be[3:0]),

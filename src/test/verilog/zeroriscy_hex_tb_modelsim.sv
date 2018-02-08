@@ -42,7 +42,7 @@ module zeroriscy_hex_tb();
       .M_AXI_AWSIZE(),
       .M_AXI_AWBURST(),
       .M_AXI_AWCACHE(),
-      .M_AXI_AWVALID(rreq),
+      .M_AXI_AWVALID(wreq),
       .M_AXI_AWREADY(1'b1),
 
       ////////////////////////////////////////////////////////////////////////////
@@ -50,7 +50,7 @@ module zeroriscy_hex_tb();
       .M_AXI_WDATA(ss_wdata),
       .M_AXI_WSTRB(),
       .M_AXI_WLAST(),
-      .M_AXI_WVALID(wreq),
+      .M_AXI_WVALID(),
       .M_AXI_WREADY(1'b1),
 
       ////////////////////////////////////////////////////////////////////////////
@@ -158,7 +158,8 @@ module zeroriscy_hex_tb();
    end
 
    always @(posedge clk)begin
-      if(DUT.zeroriscy_core.data_req_o & DUT.zeroriscy_core.data_we_o & (DUT.zeroriscy_core.data_addr_o == 32'h9a100008))
+      if(DUT.zeroriscy_core.data_req_o & DUT.zeroriscy_core.data_we_o & DUT.zeroriscy_core.data_gnt_i &
+         (DUT.zeroriscy_core.data_addr_o == 32'h9a100008))
         $write("%s",DUT.zeroriscy_core.data_wdata_o[7:0]);
    end
 

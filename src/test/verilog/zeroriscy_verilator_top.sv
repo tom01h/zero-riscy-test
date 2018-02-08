@@ -43,7 +43,7 @@ module zeroriscy_verilator_top
       .M_AXI_AWSIZE(),
       .M_AXI_AWBURST(),
       .M_AXI_AWCACHE(),
-      .M_AXI_AWVALID(rreq),
+      .M_AXI_AWVALID(wreq),
       .M_AXI_AWREADY(1'b1),
 
       ////////////////////////////////////////////////////////////////////////////
@@ -51,7 +51,7 @@ module zeroriscy_verilator_top
       .M_AXI_WDATA(ss_wdata),
       .M_AXI_WSTRB(),
       .M_AXI_WLAST(),
-      .M_AXI_WVALID(wreq),
+      .M_AXI_WVALID(),
       .M_AXI_WREADY(1'b1),
 
       ////////////////////////////////////////////////////////////////////////////
