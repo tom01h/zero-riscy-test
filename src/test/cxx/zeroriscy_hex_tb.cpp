@@ -43,7 +43,7 @@ void xmodem(Vzeroriscy_verilator_top* verilator_top, VerilatedVcdC* tfp)
   //// wait NAK ////
   while(!((verilator_top->v__DOT__uart_sim__DOT__req_l)&&
           (verilator_top->v__DOT__uart_sim__DOT__we_l)&&
-          (verilator_top->v__DOT__uart_sim__DOT__addr_l==2)&&
+          (verilator_top->v__DOT__uart_sim__DOT__addr_l==1)&&
           (verilator_top->v__DOT__uart_sim__DOT__d_l==0x15))){
     eval(verilator_top, tfp);
   }
@@ -91,7 +91,7 @@ void xmodem(Vzeroriscy_verilator_top* verilator_top, VerilatedVcdC* tfp)
     //// wait ACK ////
     while(!((verilator_top->v__DOT__uart_sim__DOT__req_l)&
             (verilator_top->v__DOT__uart_sim__DOT__we_l)&
-            (verilator_top->v__DOT__uart_sim__DOT__addr_l==2)&
+            (verilator_top->v__DOT__uart_sim__DOT__addr_l==1)&
             (verilator_top->v__DOT__uart_sim__DOT__d_l==0x06))){
       eval(verilator_top, tfp);
     }
@@ -107,7 +107,7 @@ void xmodem(Vzeroriscy_verilator_top* verilator_top, VerilatedVcdC* tfp)
   //// wait ACK ////
   while(!((verilator_top->v__DOT__uart_sim__DOT__req_l)&
           (verilator_top->v__DOT__uart_sim__DOT__we_l)&
-          (verilator_top->v__DOT__uart_sim__DOT__addr_l==2)&
+          (verilator_top->v__DOT__uart_sim__DOT__addr_l==1)&
           (verilator_top->v__DOT__uart_sim__DOT__d_l==0x06))){
     eval(verilator_top, tfp);
   }
@@ -212,14 +212,14 @@ int main(int argc, char **argv, char **env) {
     // if putc
     if((verilator_top->v__DOT__uart_sim__DOT__req_l)&
        (verilator_top->v__DOT__uart_sim__DOT__we_l)&
-       (verilator_top->v__DOT__uart_sim__DOT__addr_l==2)){
+       (verilator_top->v__DOT__uart_sim__DOT__addr_l==1)){
       putc((char)verilator_top->v__DOT__uart_sim__DOT__d_l, stdout);
     }
     // if getc
     if((verilator_top->v__DOT__uart_sim__DOT__req_l)&
        (~verilator_top->v__DOT__uart_sim__DOT__we_l)&
        (verilator_top->v__DOT__uart_sim__DOT__cnt==0)&
-       (verilator_top->v__DOT__uart_sim__DOT__addr_l==1)){
+       (verilator_top->v__DOT__uart_sim__DOT__addr_l==2)){
       keyin = getc(stdin);  // Unix
       //keyin = getch(); // Windows
       keyin = (keyin=='\n') ? '\r' : keyin;

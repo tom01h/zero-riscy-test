@@ -159,7 +159,7 @@ module zeroriscy_hex_tb();
 
    always @(posedge clk)begin
       if(DUT.zeroriscy_core.data_req_o & DUT.zeroriscy_core.data_we_o & DUT.zeroriscy_core.data_gnt_i &
-         (DUT.zeroriscy_core.data_addr_o == 32'h9a100008))
+         (DUT.zeroriscy_core.data_addr_o == 32'h9a100004))
         $write("%s",DUT.zeroriscy_core.data_wdata_o[7:0]);
    end
 

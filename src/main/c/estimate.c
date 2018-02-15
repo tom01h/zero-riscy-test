@@ -2,7 +2,7 @@
 #include "pict.h"
 //#include "activ1.h"
 
-volatile unsigned char *Data = ((volatile unsigned char *)0x9a100008);
+volatile unsigned char *Data = ((volatile unsigned char *)0x9a100004);
 volatile unsigned char *Endf = ((volatile unsigned char *)0x8017fffc);
 
 extern int bnn_ini(int);
