@@ -10,8 +10,8 @@
 | 80200000 | 0         | ?         | ?                |
 |          |           |           |                  |
 | 8017fffc | 1B        | 1B        | htif             |
-| 9a100008 | 1B        | 1B        | char out for sim |
-| 9a100010 | 16B       | 16B       | UART for FPGA    |
+| 9a100004 | 1B        | 1B        | char out for sim |
+| 9a101000 | 16B       | 16B       | UART for FPGA    |
 
 ## Verilator sim option
 for waveform
@@ -115,7 +115,7 @@ cd ${zero-riscy-test}/src/fpga/verilog/
 
 ### Build, program FPGA
 
-open ```fpga/ARTYA7/project_1/project_1.xpr``` by vivado, and ....
+open ```fpga/ARTYA7/project_2/project_2.xpr``` by vivado, and ....
 
 ### set serial terminal
 
