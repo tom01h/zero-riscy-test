@@ -62,7 +62,6 @@ zeroriscy_ex_block.sv \
 zeroriscy_id_stage.sv \
 zeroriscy_if_stage.sv \
 zeroriscy_load_store_unit.sv \
-zeroriscy_multdiv_slow.sv \
 zeroriscy_multdiv_fast.sv \
 zeroriscy_bnn.sv \
 zeroriscy_prefetch_buffer.sv \
