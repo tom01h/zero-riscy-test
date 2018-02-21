@@ -14,11 +14,21 @@ RANLIB  = $(BINDIR)/$(ADDNAME)ranlib
 STRIP   = $(BINDIR)/$(ADDNAME)strip
 
 OBJS  = startup.o main.o
-OBJS += lib.o serial.o
+OBJS += lib.o
+ifeq ($(UART),ps7)
+OBJS += serial_ps7.o
+else
+ifeq ($(UART),uartlite)
+OBJS += serial.o
+else
+OBJS += serial.o
+UART_FLAG = -DUARTSIM
+endif
+endif
 
 TARGET = kozos
 
-CFLAGS = -Wall -nostdinc -nostdlib -fno-builtin
+CFLAGS = -nostdinc -nostdlib -fno-builtin
 CFLAGS += -I.
 #CFLAGS += -g
 CFLAGS += -O
@@ -37,10 +47,10 @@ $(TARGET) :	$(OBJS)
 		$(STRIP) $(TARGET)
 
 .c.o :		$<
-		$(CC) -c $(CFLAGS) $<
+		$(CC) -c $(CFLAGS) $(UART_FLAG) $<
 
 .s.o :		$<
 		$(CC) -c $(CFLAGS) $<
 
 clean :
-		rm -f $(OBJS) $(TARGET) $(TARGET).elf
+		rm -f $(OBJS) $(TARGET) $(TARGET).elf $(TARGET).ihex

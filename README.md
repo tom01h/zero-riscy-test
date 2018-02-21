@@ -1,17 +1,18 @@
 # zero-riscy test-env
 
 ## MEM MAP
-|  Address | Real Size | Full Size | Area             |
-|       :- | :-        | :-        | :-               |
-| 00000000 | 0         | 2GB       | DRAM?            |
-| 80000000 | 16KB      | 512KB     | Boot             |
-| 80080000 | 16KB      | 512KB     | Instruction      |
-| 80100000 | 128KB     | 1M        | Data             |
-| 80200000 | 0         | ?         | ?                |
-|          |           |           |                  |
-| 8017fffc | 1B        | 1B        | htif             |
-| 9a100004 | 1B        | 1B        | char out for sim |
-| 9a101000 | 16B       | 16B       | UART for FPGA    |
+| Address  | Real Size | Full Size | Area                 |
+| :-       | :-        | :-        | :-                   |
+| 00000000 | 0         | 2GB       | DRAM?                |
+| 80000000 | 16KB      | 512KB     | Boot                 |
+| 80080000 | 16KB      | 512KB     | Instruction          |
+| 80100000 | 128KB     | 1M        | Data                 |
+| 80200000 | 0         | ?         | ?                    |
+|          |           |           |                      |
+| 8017fffc | 1B        | 1B        | htif                 |
+| 9a100004 | 1B        | 1B        | char out for sim     |
+| 9a101000 | 16B       | 16B       | UART Lite for ArtyA7 |
+| e0000000 | 48B       | 48B       | PS UART for ArtyZ7   |
 
 ## Verilator sim option
 for waveform
@@ -74,7 +75,6 @@ Approximate....
 ## run kozos boot load test @ Verilator
 
 verilator 3.884 or lator must be installed and on the path.  
-select UART in defines.h (#define SERIAL_DEFAULT_DEVICE 1) in src/main/kozos/{bootrom,os}
 
 ```
 cd ${zero-riscy-test}/src/main/kozos/bootload
@@ -104,7 +104,13 @@ Hello World!
 ```
 
 ## run kozos boot load test @ ARTY A7 FPGA
-select UART in defines.h (#define SERIAL_DEFAULT_DEVICE 0) in src/main/kozos/{bootrom,os}, and build them.  
+
+```
+cd ${zero-riscy-test}/src/main/kozos/bootload
+make UART=uartlite
+cd ${zero-riscy-test}/src/main/kozos/os
+make UART=uartlite
+```
 
 ### convert rom data
 
@@ -126,6 +132,41 @@ parity none
 stop 1bit
 flow none
 ```
+
+## run kozos boot load test @ ARTY Z7 FPGA
+
+```
+cd ${zero-riscy-test}/src/main/kozos/bootload
+make UART=ps7
+cd ${zero-riscy-test}/src/main/kozos/os
+make UART=ps7
+```
+
+### convert rom data
+
+```
+cd ${zero-riscy-test}/src/fpga/verilog/
+./ramcnv.pl ../../main/kozos/bootload/kzload.ihex
+```
+
+### Build, program FPGA
+
+open ```fpga/ARTYZ7/project_1/project_1.xpr``` by vivado, and ....
+
+### set serial terminal
+
+```
+19200 bps
+data 8bit
+parity none
+stop 1bit
+flow none
+```
+
+### create and run hello project on SDK
+In order to initialize the Zynq Processor System you need to run Hello Project at once.
+If you program the bitstream again after run Hello, kzload will work.
+In the future I would like to make it work without doing this.
 
 ## run isa test
 ### @ ModelSim
