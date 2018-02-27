@@ -68,8 +68,8 @@ Result
 Approximate....
 == Pass Count :  0000001 ==
 Approximate....
--0258598, -0555011, -0176046,  1085366, -1230738,  0751510,  0515738, -0362938,  0093014,  0206960,
-*** PASSED *** after             21762250 simulation cycles
+-0557870, -0318241, -0370820,  1270316, -1070926,  0682038,  0757464, -0834358,  0524606,  0090144,
+*** PASSED *** after              4071178 simulation cycles
 ```
 
 ## run kozos boot load test @ Verilator

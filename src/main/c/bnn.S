@@ -3,6 +3,9 @@
 #define BNN_POOL_OP  (0x0000200b)
 #define BNN_NORM_OP  (0x0000300b)
 #define BNN_ACTIV_OP (0x0000400b)
+#define BNN_ACC8_OP  (0x0000500b)
+#define BNN_SET_OP   (0x0000600b)
+#define BNN_NORM8_OP (0x0000700b)
 #define RD_A0        (0x00000500)
 #define RS1_A0       (0x00050000)
 #define RS2_A0       (0x00a00000)
@@ -31,4 +34,19 @@ bnn_norm:
 .global bnn_activ
 bnn_activ:
     .word BNN_ACTIV_OP|RD_A0
+    ret
+
+.global bnn_acc8
+bnn_acc8:
+    .word BNN_ACC8_OP|RD_A0|RS1_A0|RS2_A1
+    ret
+
+.global bnn_set
+bnn_set:
+    .word BNN_SET_OP|RS1_A0|RS2_A1
+    ret
+
+.global bnn_norm8
+bnn_norm8:
+    .word BNN_NORM8_OP|RS1_A0
     ret

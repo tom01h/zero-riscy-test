@@ -10,6 +10,9 @@ extern int bnn_acc(int,int);
 extern int bnn_pool(int);
 extern int bnn_norm(int);
 extern int bnn_activ();
+extern int bnn_acc8(int,int);
+extern int bnn_set(int,int);
+extern int bnn_norm8(int);
 
 int putc(unsigned char c)
 {
@@ -121,39 +124,34 @@ void BinConv(int ci, int yi, int xi, int in[yi+2][xi+2][ci],
   }
 }
 
-void Conv(int ci, int yi, int xi, unsigned char in[yi+2][xi+2][ci],
-          int fci, int fyi, int fxi, int f[fci][ci*fyi*fxi], int mean[ci],
+void Conv(int ci, int yi, int xi, int in[yi+2][xi+2],
+          int fci, int fyi, int fxi, int f, int mean,
           int out[yi/2+2][xi/2+2][fci])
 {
-  int acc;
-  int pool;
-  int act;
   for(int c=0; c<fci; c++){
     for(int y=0; y<yi; y+=2){
       for(int x=0; x<xi; x+=2){
-        act = 0;
-        for(int cc=0; cc<32; cc++){
-          pool = 0x80000000;
-          for(int yy=0; yy<2; yy++){
-            for(int xx=0; xx<2; xx++){
-              acc = 0;
-              for(int fc=0; fc<ci; fc++){
-                for(int fy=0; fy<fyi; fy++){
-                  for(int fx=0; fx<fxi; fx++){
-                    acc += f[c*32+cc][fy*fxi*ci+fx*ci+fc]*(in[fy+(y+yy)][fx+(x+xx)][fc]*2-255);
-                  }
+
+        bnn_ini(0);
+        for(int yy=0; yy<2; yy++){
+          for(int xx=0; xx<2; xx++){
+
+            for(int cc=0; cc<32; cc+=2){
+              int acc = 0;
+              for(int fy=0; fy<fyi; fy++){
+                for(int fx=0; fx<fxi; fx++){
+                  acc = bnn_acc8((in[fy+(y+yy)][fx+(x+xx)] | f+fy*fxi*16+fx*16+cc/2), acc);
                 }
               }
-              if(acc>pool){
-                pool=acc;
-              }
+              bnn_set(cc,acc);
             }
-          }
-          if((pool-mean[c*32+cc])<0){
-            act |= (1<<cc);
+            bnn_pool(0);
+
           }
         }
-        out[y/2+1][x/2+1][c] = act;
+        bnn_norm8(mean+c);
+        out[y/2+1][x/2+1][c] = bnn_activ();
+
       }
     }
   }
@@ -196,14 +194,15 @@ int main(int argc,char *argv[])
   }
 
   for (int i=0;i<1;i++){
+    puts("start\n");
 
-    Conv(3,32,32,pict,32/32,3,3,W1,mean1,activ1out);
+    Conv(3,32,32,pict,32/32,3,3,0,548,activ1out);
     puts("1st layer finished\n");
 
-    BinConv(32/32,16,16,activ1out,32/32,3,3,0,539,2,activ2out);
+    BinConv(32/32,16,16,activ1out,32/32,3,3,9,549,2,activ2out);
     puts("2nd layer finished\n");
 
-    BinConv(32/32,8,8,activ2out,64/32,3,3,9,540,0,activ3out);
+    BinConv(32/32,8,8,activ2out,64/32,3,3,18,550,0,activ3out);
     puts("3rd layer finished\n");
 
     for(int c=0; c<64/32; c++){
@@ -213,7 +212,7 @@ int main(int argc,char *argv[])
         }
       }
     }
-    BinAffine(1024/32,512,layer4in,27,542,activ4out);
+    BinAffine(1024/32,512,layer4in,36,552,activ4out);
     puts("4th layer finished\n");
 
     Affine(512,10,activ4out,W5,affine5out);

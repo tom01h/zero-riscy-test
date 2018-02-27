@@ -13,8 +13,8 @@ OBJDUMP = $(BINDIR)/$(ADDNAME)objdump
 RANLIB  = $(BINDIR)/$(ADDNAME)ranlib
 STRIP   = $(BINDIR)/$(ADDNAME)strip
 
-#OBJS  = startup.o estimate.o bnn.o
-OBJS  = startup.o main.o
+OBJS  = startup.o estimate.o bnn.o
+#OBJS  = startup.o main.o
 OBJS += 
 
 TARGET = estimate
@@ -44,10 +44,8 @@ $(TARGET) :	$(OBJS)
 .s.o :		$<
 		$(CC) -c $(CFLAGS) $<
 
-$(TARGET).mot :	$(TARGET)
-		$(OBJCOPY) -O srec $(TARGET) $(TARGET).mot
-
-image :		$(TARGET).mot
+.S.o :		$<
+		$(CC) -c $(CFLAGS) $<
 
 clean :
 		rm -f $(OBJS) $(TARGET) $(TARGET).elf $(TARGET).mot $(TARGET).ihex
