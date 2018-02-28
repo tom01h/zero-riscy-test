@@ -10,7 +10,7 @@ extern int bnn_acc(int,int);
 extern int bnn_pool(int);
 extern int bnn_norm(int);
 extern int bnn_activ();
-extern int bnn_acc8(int,int);
+extern int bnn_acc8(int *,int *,int *, int);
 extern int bnn_set(int,int);
 extern int bnn_norm8(int);
 
@@ -136,13 +136,11 @@ void Conv(int ci, int yi, int xi, int in[yi+2][xi+2],
         for(int yy=0; yy<2; yy++){
           for(int xx=0; xx<2; xx++){
 
+            int* addr0 = &in[0+(y+yy)][0+(x+xx)];
+            int* addr1 = &in[1+(y+yy)][0+(x+xx)];
+            int* addr2 = &in[2+(y+yy)][0+(x+xx)];
             for(int cc=0; cc<32; cc+=2){
-              int acc = 0;
-              for(int fy=0; fy<fyi; fy++){
-                for(int fx=0; fx<fxi; fx++){
-                  acc = bnn_acc8((in[fy+(y+yy)][fx+(x+xx)] | f+fy*fxi*16+fx*16+cc/2), acc);
-                }
-              }
+              int acc = bnn_acc8(addr0, addr1, addr2, cc/2);
               bnn_set(cc,acc);
             }
             bnn_pool(0);
