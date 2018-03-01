@@ -90,6 +90,7 @@ bnn_acc8:
     lw      a4,8(a2)
     add     a4,a3,a4
     .word BNN_ACC8_OP|BNN_PARAM8|RD_A0|RS1_A4|RS2_A5
+    .word BNN_SET_OP|RS1_A3|RS2_A0
     ret
 
 .global bnn_set
