@@ -295,7 +295,7 @@
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>viewChecksum</spirit:name>
-            <spirit:value>649511d1</spirit:value>
+            <spirit:value>d330f3c8</spirit:value>
           </spirit:parameter>
         </spirit:parameters>
       </spirit:view>
@@ -311,7 +311,7 @@
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>viewChecksum</spirit:name>
-            <spirit:value>649511d1</spirit:value>
+            <spirit:value>d330f3c8</spirit:value>
           </spirit:parameter>
         </spirit:parameters>
       </spirit:view>
@@ -1092,8 +1092,8 @@
       </xilinx:taxonomies>
       <xilinx:displayName>zeroriscy_sim_top_v1_0</xilinx:displayName>
       <xilinx:definitionSource>package_project</xilinx:definitionSource>
-      <xilinx:coreRevision>19</xilinx:coreRevision>
-      <xilinx:coreCreationDateTime>2018-02-16T12:27:30Z</xilinx:coreCreationDateTime>
+      <xilinx:coreRevision>21</xilinx:coreRevision>
+      <xilinx:coreCreationDateTime>2018-03-02T11:30:34Z</xilinx:coreCreationDateTime>
       <xilinx:tags>
         <xilinx:tag xilinx:name="xilinx.com:user:zeroriscy_sim_top:1.0_ARCHIVE_LOCATION">c:/Users/tom01/RISC-V/zero-riscy-test</xilinx:tag>
       </xilinx:tags>
@@ -1102,7 +1102,7 @@
       <xilinx:xilinxVersion>2017.4</xilinx:xilinxVersion>
       <xilinx:checksum xilinx:scope="busInterfaces" xilinx:value="8c1cd416"/>
       <xilinx:checksum xilinx:scope="addressSpaces" xilinx:value="fa820a90"/>
-      <xilinx:checksum xilinx:scope="fileGroups" xilinx:value="e2ca63c6"/>
+      <xilinx:checksum xilinx:scope="fileGroups" xilinx:value="c10c33df"/>
       <xilinx:checksum xilinx:scope="ports" xilinx:value="14d9dfc1"/>
       <xilinx:checksum xilinx:scope="parameters" xilinx:value="8e852734"/>
     </xilinx:packagingInfo>

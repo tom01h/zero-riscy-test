@@ -149,7 +149,7 @@ cd ${zero-riscy-test}/src/fpga/verilog/
 ./ramcnv.pl ../../main/kozos/bootload/kzload.ihex
 ```
 
-### Build, program FPGA
+### Build, ~~program~~ FPGA
 
 open ```fpga/ARTYZ7/project_1/project_1.xpr``` by vivado, and ....
 
@@ -163,10 +163,12 @@ stop 1bit
 flow none
 ```
 
-### create and run hello project on SDK
-In order to initialize the Zynq Processor System you need to run Hello Project at once.
-If you program the bitstream again after run Hello, kzload will work.
-In the future I would like to make it work without doing this.
+### init PS and program FPGA
+
+```
+cd ${zero-riscy-test}/fpga/ARTYZ7
+c:\Xilinx\SDK\2017.4\bin\xsct.bat ps7_init.xsc
+```
 
 ## run isa test
 ### @ ModelSim
