@@ -4,3 +4,6 @@
 [submodule "src/main/core2axi"]
 	path = src/main/core2axi
 	url = https://github.com/pulp-platform/core2axi
+[submodule "src/main/sdcard_mass_storage_controller"]
+	path = src/main/sdcard_mass_storage_controller
+	url = https://github.com/tom01h/sdcard_mass_storage_controller

@@ -1,7 +1,7 @@
 //Copyright 1986-2017 Xilinx, Inc. All Rights Reserved.
 //--------------------------------------------------------------------------------
 //Tool Version: Vivado v.2017.4 (win64) Build 2086221 Fri Dec 15 20:55:39 MST 2017
-//Date        : Fri Feb 16 21:27:46 2018
+//Date        : Mon Mar 26 00:48:12 2018
 //Host        : DESKTOP-OLMGF8H running 64-bit major release  (build 9200)
 //Command     : generate_target design_1_wrapper.bd
 //Design      : design_1_wrapper
@@ -10,22 +10,38 @@
 `timescale 1 ps / 1 ps
 
 module design_1_wrapper
-   (reset,
+   (SDIO_CLK,
+    SDIO_CMD,
+    SDIO_DATA,
+    SDIO_NODISK,
+    reset,
     sys_clock,
     usb_uart_rxd,
     usb_uart_txd);
+  output SDIO_CLK;
+  inout SDIO_CMD;
+  inout [3:0]SDIO_DATA;
+  input SDIO_NODISK;
   input reset;
   input sys_clock;
   input usb_uart_rxd;
   output usb_uart_txd;
 
+  wire SDIO_CLK;
+  wire SDIO_CMD;
+  wire [3:0]SDIO_DATA;
+  wire SDIO_NODISK;
   wire reset;
   wire sys_clock;
   wire usb_uart_rxd;
   wire usb_uart_txd;
 
   design_1 design_1_i
-       (.reset(reset),
+       (.SDIO_CLK(SDIO_CLK),
+        .SDIO_CMD(SDIO_CMD),
+        .SDIO_DATA(SDIO_DATA),
+        .SDIO_NODISK(SDIO_NODISK),
+        .reset(reset),
         .sys_clock(sys_clock),
         .usb_uart_rxd(usb_uart_rxd),
         .usb_uart_txd(usb_uart_txd));

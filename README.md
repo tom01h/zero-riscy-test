@@ -12,6 +12,7 @@
 | 8017fffc | 1B        | 1B        | htif                 |
 | 9a100004 | 1B        | 1B        | char out for sim     |
 | 9a101000 | 16B       | 16B       | UART Lite for ArtyA7 |
+| 9a102000 | 28B       | 28B       | SD Card Controller   |
 | e0000000 | 48B       | 48B       | PS UART for ArtyZ7   |
 
 ## Verilator sim option
