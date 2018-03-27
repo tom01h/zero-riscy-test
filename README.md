@@ -122,6 +122,7 @@ cd ${zero-riscy-test}/src/fpga/verilog/
 
 ### Build, program FPGA
 
+remove vivado work files ```git clean -xdf fpga/ARTYA7/project_2/```  
 open ```fpga/ARTYA7/project_2/project_2.xpr``` by vivado, and ....
 
 ### set serial terminal
@@ -152,6 +153,7 @@ cd ${zero-riscy-test}/src/fpga/verilog/
 
 ### Build, ~~program~~ FPGA
 
+remove vivado work files ```git clean -xdf fpga/ARTYZ7/project_1/```  
 open ```fpga/ARTYZ7/project_1/project_1.xpr``` by vivado, and ....
 
 ### set serial terminal
