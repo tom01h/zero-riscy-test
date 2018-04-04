@@ -77,6 +77,7 @@ verilog/zeroriscy_xbar.v \
 verilog/zeroriscy_i_sram.sv \
 verilog/zeroriscy_d_sram.sv \
 verilog/uart_sim.v \
+verilog/sd_sim.v \
 core2axi/rtl/core2axi.sv \
 )
 

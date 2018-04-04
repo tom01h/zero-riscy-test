@@ -1,6 +1,7 @@
 #include "defines.h"
 #include "elf.h"
 #include "lib.h"
+#include "ff.h"
 
 struct elf_header {
   struct {
@@ -57,7 +58,7 @@ static int elf_check(struct elf_header *header)
 }
 
 /* セグメント単位でのロード */
-static int elf_load_program(struct elf_header *header)
+static int elf_load_program(struct elf_header *header, FIL* fil)
 {
   int i;
   struct elf_program_header *phdr;
@@ -71,8 +72,13 @@ static int elf_load_program(struct elf_header *header)
     if (phdr->type != 1) /* ロード可能なセグメントか？ */
       continue;
 
-    memcpy((char *)phdr->physical_addr, (char *)header + phdr->offset,
-	   phdr->file_size);
+    if(fil==0){
+      memcpy((char *)phdr->physical_addr, (char *)header + phdr->offset,
+             phdr->file_size);
+    }else{
+      f_lseek (fil, phdr->offset);
+      f_read (fil, phdr->physical_addr, phdr->file_size, &i);
+    }
     memset((char *)phdr->physical_addr + phdr->file_size, 0,
 	   phdr->memory_size - phdr->file_size);
   }
@@ -80,14 +86,14 @@ static int elf_load_program(struct elf_header *header)
   return 0;
 }
 
-char *elf_load(char *buf)
+char *elf_load(char *buf, FIL* fil)
 {
   struct elf_header *header = (struct elf_header *)buf;
 
   if (elf_check(header) < 0) /* ELFヘッダのチェック */
     return NULL;
 
-  if (elf_load_program(header) < 0) /* セグメント単位でのロード */
+  if (elf_load_program(header, fil) < 0) /* セグメント単位でのロード */
     return NULL;
 
   return (char *)header->entry_point;

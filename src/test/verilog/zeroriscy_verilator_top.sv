@@ -84,12 +84,28 @@ module zeroriscy_verilator_top
       .clk(clk),
       .resetn(~reset),
 
-      .req(ss_req & (ss_addr[31:4]==28'h9a10_000)),
+      .req(ss_req & (ss_addr[31:8]==28'h9a10_00)),
       .addr(ss_addr[31:0]),
       .we(ss_we),
       .be(ss_be[3:0]),
       .wdata(ss_wdata),
       .rdata(ss_rdata[31:0]),
+      .gnt(),
+      .rvalid(),
+      .err()
+   );
+
+   sd_sim sd_sim
+     (
+      .clk(clk),
+      .resetn(~reset),
+
+      .req(ss_req & (ss_addr[31:8]==24'h9a10_10)),
+      .addr(ss_addr[31:0]),
+      .we(ss_we),
+      .be(ss_be[3:0]),
+      .wdata(ss_wdata),
+      .rdata(),
       .gnt(),
       .rvalid(),
       .err()

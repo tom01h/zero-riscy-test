@@ -86,7 +86,7 @@ cd ${zero-riscy-test}
 make verilator-board-test
 ```
 
-Result
+Result @ XMODEM
 
 ```
 cp src/main/kozos/bootload/kzload.ihex loadmem.ihex
@@ -97,6 +97,22 @@ kzload (kozos boot loader) started.
 kzload> load <- type
 XMODEM receive succeeded.
 kzload> run <- type
+starting from entry point: 80080000
+Hello World!
+> echo aaa <- type
+ aaa
+> q
+```
+
+Result @ SD CARD
+
+```
+cp src/main/kozos/bootload/kzload.ihex loadmem.ihex
+cp src/main/kozos/os/kozos sdcard/
+sim/Vzeroriscy_verilator_top --vcdfile=board.vcd
+Running ...
+kzload (kozos boot loader) started.
+kzload> run kozos <- type
 starting from entry point: 80080000
 Hello World!
 > echo aaa <- type

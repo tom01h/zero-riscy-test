@@ -204,11 +204,75 @@ int main(int argc, char **argv, char **env) {
     }
   }
 
+   // 00      => data buf address
+   // 04      => Number of bytes to read
+   // 08      => pointer to Number of bytes read
+   // 0c      => move file pointer
+   // 20 - 3f => read size buf address
+
+  char filename[32+7]="sdcard/";
+  int readsize;
+  int buffpointer;
+  int sizepointer;
+  FILE *sd;
+
   int keyin, load;
   system("stty -echo -icanon min 1 time 0"); // Unix
   while (!Verilated::gotFinish()) {
     // reset
     verilator_top->reset = (main_time < 1000) ? 1 : 0;
+    // if sd file open
+    if((verilator_top->v__DOT__sd_sim__DOT__req_l)&
+       (verilator_top->v__DOT__sd_sim__DOT__we_l)&
+       (verilator_top->v__DOT__sd_sim__DOT__addr_l>=32)){
+      filename[verilator_top->v__DOT__sd_sim__DOT__addr_l - 32 + 7] =
+        (char)verilator_top->v__DOT__sd_sim__DOT__d_l;
+      if(verilator_top->v__DOT__sd_sim__DOT__d_l==0){
+        sd = fopen(filename,"r");
+        if( fd == NULL ){
+          printf("ERROR!! SD card file not found\n");
+          return -1;
+        }
+      }
+
+    }
+    // if sd read buff pointer
+    if((verilator_top->v__DOT__sd_sim__DOT__req_l)&
+       (verilator_top->v__DOT__sd_sim__DOT__we_l)&
+       (verilator_top->v__DOT__sd_sim__DOT__addr_l==0)){
+      buffpointer=verilator_top->v__DOT__sd_sim__DOT__d_l;
+      buffpointer&=0x3ffff;
+    }
+    // if sd read
+    if((verilator_top->v__DOT__sd_sim__DOT__req_l)&
+       (verilator_top->v__DOT__sd_sim__DOT__we_l)&
+       (verilator_top->v__DOT__sd_sim__DOT__addr_l==4)){
+      int lb, tmp;
+      int c;
+      for(lb=0; lb<verilator_top->v__DOT__sd_sim__DOT__d_l; lb++){
+        tmp=verilator_top->v__DOT__DUT__DOT__zeroriscy_d_sram__DOT__dmem[(buffpointer+lb)/4];
+        if((c = fgetc(sd))==EOF){break;}
+        if(lb%4==0){tmp&=0xffffff00;tmp|=c<<0;}
+        if(lb%4==1){tmp&=0xffff00ff;tmp|=c<<8;}
+        if(lb%4==2){tmp&=0xff00ffff;tmp|=c<<16;}
+        if(lb%4==3){tmp&=0x00ffffff;tmp|=c<<24;}
+        verilator_top->v__DOT__DUT__DOT__zeroriscy_d_sram__DOT__dmem[(buffpointer+lb)/4]=tmp;
+      }
+      verilator_top->v__DOT__DUT__DOT__zeroriscy_d_sram__DOT__dmem[sizepointer/4]=lb;
+    }
+    // if sd read size pointer
+    if((verilator_top->v__DOT__sd_sim__DOT__req_l)&
+       (verilator_top->v__DOT__sd_sim__DOT__we_l)&
+       (verilator_top->v__DOT__sd_sim__DOT__addr_l==8)){
+      sizepointer=verilator_top->v__DOT__sd_sim__DOT__d_l;
+      sizepointer&=0x3ffff;
+    }
+    // if sd move file pointer
+    if((verilator_top->v__DOT__sd_sim__DOT__req_l)&
+       (verilator_top->v__DOT__sd_sim__DOT__we_l)&
+       (verilator_top->v__DOT__sd_sim__DOT__addr_l==12)){
+      fseek(sd, verilator_top->v__DOT__sd_sim__DOT__d_l, SEEK_SET);
+    }
     // if putc
     if((verilator_top->v__DOT__uart_sim__DOT__req_l)&
        (verilator_top->v__DOT__uart_sim__DOT__we_l)&

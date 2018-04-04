@@ -21,7 +21,7 @@ else
 ifeq ($(UART),uartlite)
 OBJS += serial.o
 else
-OBJS += serial.o
+OBJS += serial.o ff.o
 UART_FLAG = -DUARTSIM
 endif
 endif
