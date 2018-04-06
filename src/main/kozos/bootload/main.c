@@ -101,9 +101,21 @@ int main(void)
     } else if (!strncmp(buf, "run", 3)) { /* ELF形式ファイルの実行 */
       if(buf[3]){
         Res = f_mount(&fatfs, Path, 0);
-        Res = f_open(&fil, &buf[4], FA_READ);
-        Res = f_read(&fil, buff, FileSize, &NumBytesRead);
-        entry_point = elf_load(buff, &fil); /* メモリ上に展開(ロード) */
+        if(!Res){
+          Res = f_open(&fil, &buf[4], FA_READ);
+        }else{
+          puts("f_mount error ");putxval(Res, 2); puts("\n");
+        }
+        if(!Res){
+          Res = f_read(&fil, buff, FileSize, &NumBytesRead);
+        }else{
+          puts("f_open error ");putxval(Res, 2); puts("\n");
+        }
+        if(!Res){
+          entry_point = elf_load(buff, &fil); /* メモリ上に展開(ロード) */
+        }else{
+          puts("f_read error ");putxval(Res, 2); puts("\n");
+        }
       }else{
         entry_point = elf_load(loadbuf, 0); /* メモリ上に展開(ロード) */
       }

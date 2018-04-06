@@ -16,12 +16,12 @@ STRIP   = $(BINDIR)/$(ADDNAME)strip
 OBJS  = startup.o main.o
 OBJS += lib.o
 ifeq ($(UART),ps7)
-OBJS += serial_ps7.o
+OBJS += serial_ps7.o ff.o diskio.o
 else
 ifeq ($(UART),uartlite)
-OBJS += serial.o
+OBJS += serial.o ff.o diskio.o
 else
-OBJS += serial.o ff.o
+OBJS += serial.o ff_sim.o
 UART_FLAG = -DUARTSIM
 endif
 endif

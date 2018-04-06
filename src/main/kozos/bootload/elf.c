@@ -60,7 +60,7 @@ static int elf_check(struct elf_header *header)
 /* セグメント単位でのロード */
 static int elf_load_program(struct elf_header *header, FIL* fil)
 {
-  int i;
+  int i, tmp;
   struct elf_program_header *phdr;
 
   for (i = 0; i < header->program_header_num; i++) {
@@ -77,7 +77,7 @@ static int elf_load_program(struct elf_header *header, FIL* fil)
              phdr->file_size);
     }else{
       f_lseek (fil, phdr->offset);
-      f_read (fil, phdr->physical_addr, phdr->file_size, &i);
+      f_read (fil, phdr->physical_addr, phdr->file_size, &tmp);
     }
     memset((char *)phdr->physical_addr + phdr->file_size, 0,
 	   phdr->memory_size - phdr->file_size);
