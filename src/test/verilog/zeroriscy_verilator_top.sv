@@ -100,7 +100,7 @@ module zeroriscy_verilator_top
       .clk(clk),
       .resetn(~reset),
 
-      .req(ss_req & (ss_addr[31:8]==24'h9a10_10)),
+      .req(ss_req & (ss_addr[31:8]==24'h9a10_01)),
       .addr(ss_addr[31:0]),
       .we(ss_we),
       .be(ss_be[3:0]),

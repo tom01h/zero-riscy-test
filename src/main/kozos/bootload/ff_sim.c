@@ -1,10 +1,10 @@
 #include "ff.h"
 
-static volatile unsigned char *SDFN = ((volatile unsigned char *)0x9a101020);
-static volatile unsigned int  *SDBP = ((volatile unsigned int  *)0x9a101000);
-static volatile unsigned int  *SDRS = ((volatile unsigned int  *)0x9a101004);
-static volatile unsigned int  *SDSP = ((volatile unsigned int  *)0x9a101008);
-static volatile unsigned int  *SDFP = ((volatile unsigned int  *)0x9a10100c);
+static volatile unsigned char *SDFN = ((volatile unsigned char *)0x9a100120);
+static volatile unsigned int  *SDBP = ((volatile unsigned int  *)0x9a100100);
+static volatile unsigned int  *SDRS = ((volatile unsigned int  *)0x9a100104);
+static volatile unsigned int  *SDSP = ((volatile unsigned int  *)0x9a100108);
+static volatile unsigned int  *SDFP = ((volatile unsigned int  *)0x9a10010c);
 
 FRESULT f_mount (FATFS* fs, const TCHAR* path, BYTE opt){
   return 0;
