@@ -1,7 +1,7 @@
 //Copyright 1986-2017 Xilinx, Inc. All Rights Reserved.
 //--------------------------------------------------------------------------------
 //Tool Version: Vivado v.2017.4 (win64) Build 2086221 Fri Dec 15 20:55:39 MST 2017
-//Date        : Fri Mar  2 20:31:08 2018
+//Date        : Sun Apr  8 21:24:44 2018
 //Host        : DESKTOP-OLMGF8H running 64-bit major release  (build 9200)
 //Command     : generate_target design_1_wrapper.bd
 //Design      : design_1_wrapper
@@ -30,7 +30,11 @@ module design_1_wrapper
     FIXED_IO_mio,
     FIXED_IO_ps_clk,
     FIXED_IO_ps_porb,
-    FIXED_IO_ps_srstb);
+    FIXED_IO_ps_srstb,
+    SDIO_CLK,
+    SDIO_CMD,
+    SDIO_DATA,
+    SDIO_NODISK);
   inout [14:0]DDR_addr;
   inout [2:0]DDR_ba;
   inout DDR_cas_n;
@@ -52,6 +56,10 @@ module design_1_wrapper
   inout FIXED_IO_ps_clk;
   inout FIXED_IO_ps_porb;
   inout FIXED_IO_ps_srstb;
+  output SDIO_CLK;
+  inout SDIO_CMD;
+  inout [3:0]SDIO_DATA;
+  input SDIO_NODISK;
 
   wire [14:0]DDR_addr;
   wire [2:0]DDR_ba;
@@ -74,6 +82,10 @@ module design_1_wrapper
   wire FIXED_IO_ps_clk;
   wire FIXED_IO_ps_porb;
   wire FIXED_IO_ps_srstb;
+  wire SDIO_CLK;
+  wire SDIO_CMD;
+  wire [3:0]SDIO_DATA;
+  wire SDIO_NODISK;
 
   design_1 design_1_i
        (.DDR_addr(DDR_addr),
@@ -96,5 +108,9 @@ module design_1_wrapper
         .FIXED_IO_mio(FIXED_IO_mio),
         .FIXED_IO_ps_clk(FIXED_IO_ps_clk),
         .FIXED_IO_ps_porb(FIXED_IO_ps_porb),
-        .FIXED_IO_ps_srstb(FIXED_IO_ps_srstb));
+        .FIXED_IO_ps_srstb(FIXED_IO_ps_srstb),
+        .SDIO_CLK(SDIO_CLK),
+        .SDIO_CMD(SDIO_CMD),
+        .SDIO_DATA(SDIO_DATA),
+        .SDIO_NODISK(SDIO_NODISK));
 endmodule
