@@ -13,11 +13,10 @@ OBJDUMP = $(BINDIR)/$(ADDNAME)objdump
 RANLIB  = $(BINDIR)/$(ADDNAME)ranlib
 STRIP   = $(BINDIR)/$(ADDNAME)strip
 
-OBJS  = startup.o estimate.o bnn.o
-#OBJS  = startup.o main.o
+OBJS  = startup.o main.o
 OBJS += 
 
-TARGET = estimate
+TARGET = hello
 
 CFLAGS = -nostdinc -nostdlib -fno-builtin
 CFLAGS += -I.
@@ -36,7 +35,7 @@ $(TARGET) :	$(OBJS)
 		$(CC) $(OBJS) -o $(TARGET) $(CFLAGS) $(LFLAGS)
 		cp $(TARGET) $(TARGET).elf
 		$(STRIP) $(TARGET)
-		$(OBJCOPY) -O ihex estimate.elf estimate.ihex
+		$(OBJCOPY) -O ihex $(TARGET).elf $(TARGET).ihex
 
 .c.o :		$<
 		$(CC) -c $(CFLAGS) $<

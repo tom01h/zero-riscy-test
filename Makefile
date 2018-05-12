@@ -35,6 +35,7 @@ VERILATOR_OPTS = \
 	-Wno-UNUSED \
 	-Wno-BLKSEQ \
 	--cc \
+	-I$(V_SRC_DIR)/verilog \
 	-I$(V_CORE_DIR)/include \
 	-I$(V_TEST_DIR) \
 	+1364-2001ext+v \
@@ -76,6 +77,7 @@ CHIP_SRCS = $(addprefix $(V_SRC_DIR)/, \
 verilog/zeroriscy_xbar.v \
 verilog/zeroriscy_i_sram.sv \
 verilog/zeroriscy_d_sram.sv \
+verilog/zeroriscy_mem_bnn.sv \
 verilog/uart_sim.v \
 verilog/sd_sim.v \
 core2axi/rtl/core2axi.sv \

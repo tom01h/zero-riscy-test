@@ -203,17 +203,40 @@ module zeroriscy_sim_top
       .ss_err(1'b0)
    );
 
+//TEMP//TEMP//
+   wire [31:0] ds_rdata_d, ds_rdata_bn;
+   reg         ds_reql_d;
+   always @ (posedge clk)begin
+      ds_reql_d  <= ds_req&({ds_addr[31:19],3'h0}==16'h8010);
+   end
+   assign ds_rdata = (ds_reql_d) ? ds_rdata_d : ds_rdata_bn ;
    zeroriscy_d_sram zeroriscy_d_sram
      (
       .clk(clk),
       .rst_n(~reset),
 
-      .p_req(ds_req),
+      .p_req(ds_req&({ds_addr[31:19],3'h0}==16'h8010)),//TEMP//TEMP//
       .p_we(ds_we),
       .p_be(ds_be[3:0]),
       .p_addr(ds_addr[31:0]),
       .p_wdata(ds_wdata[31:0]),
-      .p_rdata(ds_rdata[31:0]),
+      .p_rdata(ds_rdata_d[31:0]),
+      .p_gnt(),
+      .p_rvalid(),
+      .p_err()
+   );
+
+   zeroriscy_mem_bnn zeroriscy_mem_bnn
+     (
+      .clk(clk),
+      .rst_n(~reset),
+
+      .p_req(ds_req&({ds_addr[31:19],3'h0}==16'h8018)),//TEMP//TEMP//
+      .p_we(ds_we),
+      .p_be(ds_be[3:0]),
+      .p_addr(ds_addr[31:0]),
+      .p_wdata(ds_wdata[31:0]),
+      .p_rdata(ds_rdata_bn[31:0]),
       .p_gnt(),
       .p_rvalid(),
       .p_err()

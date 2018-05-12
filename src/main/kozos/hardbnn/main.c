@@ -5,14 +5,14 @@
 
 #include "paramb.h"
 
-extern int bnn_ini(int);
-extern int bnn_acc(int,int);
-extern int bnn_pool(int);
-extern int bnn_norm(int);
-extern int bnn_activ();
-extern int bnn_acc8(int *,int *,int *, int);
-extern int bnn_set(int,int);
-extern int bnn_norm8(int);
+extern int bnn_acc8(int *,int *,int *,int);
+volatile static int *INIT = 0x80181000;
+volatile static int *POOL = 0x80181004;
+volatile static int *ACTV = 0x8018100c;
+volatile static int *SET  = 0x80181100;
+volatile static int   *ACC  = 0x80180000;
+volatile static short *NORM = 0x80180000;
+volatile static char *NORM8 = 0x80180000;
 
 void putx(unsigned int d)
 {
@@ -54,14 +54,15 @@ void putd(int d)
 
 void BinAffine(int xi,int ci, int in[xi], int f, int mean, signed char out[1][1][ci])
 {
+  int active;
   for(int c=0; c<ci/32; c++){
-    bnn_ini(-1024);
+    *INIT = -1024;
     for(int x=0; x<xi; x++){
-      bnn_acc(f+x+c*xi,in[x]);
+      ACC[f+x+c*xi] = in[x];
     }
-    bnn_pool(-1024);
-    bnn_norm(mean+c);
-    int active = bnn_activ();
+    *POOL = -1024;
+    NORM[(mean+c)*2] = 0;
+    active = *ACTV;
     for(int cc=0; cc<32; cc++){
       if(active & (1<<cc)){
         out[0][0][c*32+cc] = -1;
@@ -89,21 +90,21 @@ void BinConv(int ci, int yi, int xi, int in[yi+2][xi+2][ci],
   for(int c=0; c<fci; c++){
     for(int y=0; y<yi; y+=2){
       for(int x=0; x<xi; x+=2){
-        bnn_ini(-288);
+        *INIT = -288;
         for(int yy=0; yy<2; yy++){
           for(int xx=0; xx<2; xx++){
             for(int fc=0; fc<ci; fc++){
               for(int fy=0; fy<fyi; fy++){
                 for(int fx=0; fx<fxi; fx++){
-                  bnn_acc(f+c*fyi*fxi+fy*fxi*ci+fx*ci+fc,in[fy+(y+yy)][fx+(x+xx)][fc]);
+                  ACC[f+c*fyi*fxi+fy*fxi*ci+fx*ci+fc] = in[fy+(y+yy)][fx+(x+xx)][fc];
                 }
               }
             }
-            bnn_pool(-288);
+            *POOL = -288;
           }
         }
-        bnn_norm(mean+c);
-        out[(y+pad)/2][(x+pad)/2][c] = bnn_activ();
+        NORM[(mean+c)*2] = 0;
+        out[(y+pad)/2][(x+pad)/2][c] = *ACTV;
       }
     }
   }
@@ -116,24 +117,20 @@ void Conv(int ci, int yi, int xi, int in[yi+2][xi+2],
   for(int c=0; c<fci; c++){
     for(int y=0; y<yi; y+=2){
       for(int x=0; x<xi; x+=2){
-
-        bnn_ini(0);
+        *INIT = 0;
         for(int yy=0; yy<2; yy++){
           for(int xx=0; xx<2; xx++){
-
             int* addr0 = &in[0+(y+yy)][0+(x+xx)];
             int* addr1 = &in[1+(y+yy)][0+(x+xx)];
             int* addr2 = &in[2+(y+yy)][0+(x+xx)];
             for(int cc=0; cc<16; cc++){
-              bnn_acc8(addr0, addr1, addr2, cc);
+              SET[cc] = bnn_acc8(addr0, addr1, addr2, cc);
             }
-            bnn_pool(0);
-
+            *POOL = 0;
           }
         }
-        bnn_norm8(mean+c);
-        out[y/2+1][x/2+1][c] = bnn_activ();
-
+        NORM8[(mean+c)*4] = 0;
+        out[y/2+1][x/2+1][c] = *ACTV;
       }
     }
   }
@@ -198,8 +195,8 @@ int main(int argc,char *argv[])
 
   // main loop
   int pass = 0;
-  for (int i=0;i<1000;i++){
-  //for (int i=0;i<1;i++){
+  //for (int i=0;i<1000;i++){
+  for (int i=0;i<1;i++){
     f_read(&fil, buff, 1, &NumBytesRead);
     label = buff[0];
     f_read(&fil, buff, 32*32*3, &NumBytesRead);
@@ -211,9 +208,9 @@ int main(int argc,char *argv[])
       }
     }
 
-    Conv(3,32,32,pict,32/32,3,3,0,548,activ1out);
-    BinConv(32/32,16,16,activ1out,32/32,3,3,9,549,2,activ2out);
-    BinConv(32/32,8,8,activ2out,64/32,3,3,18,550,0,activ3out);
+    Conv(3,32,32,pict,32/32,3,3,0,539,activ1out);
+    BinConv(32/32,16,16,activ1out,32/32,3,3,0,540,2,activ2out);
+    BinConv(32/32,8,8,activ2out,64/32,3,3,9,541,0,activ3out);
     for(int c=0; c<64/32; c++){
       for(int y=0; y<4; y++){
         for(int x=0; x<4; x++){
@@ -221,7 +218,7 @@ int main(int argc,char *argv[])
         }
       }
     }
-    BinAffine(1024/32,512,layer4in,36,552,activ4out);
+    BinAffine(1024/32,512,layer4in,27,543,activ4out);
 
     Affine(512,10,activ4out,W5,affine5out);
 
@@ -251,6 +248,12 @@ int main(int argc,char *argv[])
   puts("== Pass Count : ");
   putd(pass);
   puts(" ==\n");
+
+  for(int x=0; x<10; x++){
+    putd(affine5out[x]);
+    puts(", ");
+  }
+  puts("\n");
 
   return 0;
 }

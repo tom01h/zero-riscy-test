@@ -26,16 +26,15 @@ If verilator 3.882 or earlier, remove "--l2-name v" option in Makefile
 
 ## run puts test @ ModelSim
 
-In order to build and test "Hello world",
-ModelSim must be installed and on the path.  
-check ```OBJS  = startup.o main.o``` line in Makefile
+In order to build and test "Hello world",  
+ModelSim must be installed and on the path.
 
 ```
 cd ${zero-riscy-test}/src/main/c
 make
 cd ${zero-riscy-test}
 make modelsim-sim
-cp src/main/c/estimate.ihex loadmem.ihex
+cp src/main/c/hello.ihex loadmem.ihex
 vsim.exe -c work.zeroriscy_hex_tb -lib work -do " \
         add wave -noupdate /zeroriscy_hex_tb/* -recursive; \
         add wave -noupdate /zeroriscy_hex_tb/DUT/zeroriscy_core/id_stage_i/registers_i/mem; \
@@ -48,30 +47,6 @@ Result
 # zero riscy world
 #
 # *** PASSED *** after                  535 simulation cycles
-```
-
-## run estimate test @ Verilator
-
-verilator 3.884 or lator must be installed and on the path.  
-check ```OBJS  = startup.o estimate.o bnn.o``` line in Makefile
-
-```
-cd ${zero-riscy-test}/src/main/c
-make
-cd ${zero-riscy-test}
-make verilator-sim
-cp src/main/c/estimate.ihex loadmem.ihex
-./sim/Vzeroriscy_verilator_top
-```
-
-Result
-
-```
-Approximate....
-== Pass Count :  0000001 ==
-Approximate....
--0557870, -0318241, -0370820,  1270316, -1070926,  0682038,  0757464, -0834358,  0524606,  0090144,
-*** PASSED *** after              4071178 simulation cycles
 ```
 
 ## run kozos boot load test @ Verilator
