@@ -6,7 +6,8 @@
 | 00000000 | 0         | 2GB       | DRAM?                |
 | 80000000 | 16KB      | 512KB     | Boot                 |
 | 80080000 | 16KB      | 512KB     | Instruction          |
-| 80100000 | 128KB     | 1M        | Data                 |
+| 80100000 | 128KB     | 512KB     | Data                 |
+| 80180000 | 128KB     | 512KB     | BNN Accelerator      |
 | 80200000 | 0         | ?         | ?                    |
 |          |           |           |                      |
 | 8017fffc | 1B        | 1B        | htif                 |

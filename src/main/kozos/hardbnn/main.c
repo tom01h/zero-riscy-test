@@ -10,9 +10,9 @@ volatile static int *INIT = 0x80181000;
 volatile static int *POOL = 0x80181004;
 volatile static int *ACTV = 0x8018100c;
 volatile static int *SET  = 0x80181100;
-volatile static int   *ACC  = 0x80180000;
-volatile static short *NORM = 0x80180000;
-volatile static char *NORM8 = 0x80180000;
+volatile static int   *ACC  = 0x80180600;
+volatile static short *NORM = 0x80180600;
+volatile static char *NORM8 = 0x80180600;
 
 void putx(unsigned int d)
 {

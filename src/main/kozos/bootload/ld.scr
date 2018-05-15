@@ -9,8 +9,8 @@ MEMORY
 
 	ramall(rwx)	: o = 0x80100000, l = 0x00020000 /* 128KB */
 
-	buffer(rwx)	: o = 0x80108000, l = 0x00010000 /* 64KB */
-	data(rwx)	: o = 0x80118000, l = 0x00008000 /* 32KB */
+	buffer(rwx)	: o = 0x80108000, l = 0x00016000 /* 88KB */
+	data(rwx)	: o = 0x8011e000, l = 0x00002000 /* 8KB */
 	stack(rw)	: o = 0x8011ff00, l = 0x00000000 /* end of RAM */
 }
 

@@ -76,7 +76,6 @@ zeroriscy_core.sv \
 CHIP_SRCS = $(addprefix $(V_SRC_DIR)/, \
 verilog/zeroriscy_xbar.v \
 verilog/zeroriscy_i_sram.sv \
-verilog/zeroriscy_d_sram.sv \
 verilog/zeroriscy_mem_bnn.sv \
 verilog/uart_sim.v \
 verilog/sd_sim.v \

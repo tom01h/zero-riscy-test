@@ -5,8 +5,10 @@ ENTRY("_start")
 MEMORY
 {
 	rami(rwx)	: o = 0x80080000, l = 0x00004000 /* 16KB */
-	ramd(rwx)	: o = 0x80100100, l = 0x0001ff00 /* 128KB */
-	stack(rw)	: o = 0x8011ff00, l = 0x00000000 /* end of RAM */
+	ramd(rwx)	: o = 0x80100000, l = 0x0000c000 /* 48KB */
+	stack(rw)	: o = 0x8010bff0, l = 0x00000000 /* end of RAM */
+	ramp(rw)	: o = 0x8010c000, l = 0x00014000 /* 80KB */
+	bnnam(rw)	: o = 0x80180000, l = 0x00004000 /* 16KB */
 }
 
 SECTIONS
@@ -44,4 +46,17 @@ SECTIONS
 	.stack : {
 		_stack = .;
 	} > stack
+
+	.param : {
+		_param_start = . ;
+		*(.param)
+		_eparam = . ;
+	} > ramp
+
+	.bnna : {
+		_bnna_start = . ;
+		*(.bnna)
+		_ebnna = . ;
+	} > bnnam
+
 }

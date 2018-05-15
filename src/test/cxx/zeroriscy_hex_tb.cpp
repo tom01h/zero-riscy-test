@@ -181,7 +181,7 @@ int main(int argc, char **argv, char **env) {
       for(i=0; i<bytec/4; i = i+1){
         sscanf(data, "%8x%s", &op, data);
         if(base&0x100000){
-          verilator_top->v__DOT__DUT__DOT__zeroriscy_d_sram__DOT__dmem[((base%0x40000)+addr)/4+i] =
+          verilator_top->v__DOT__DUT__DOT__zeroriscy_mem_bnn__DOT__ram0__DOT__mem[((base%0x40000)+addr)/4+i] =
             ((op&0x0ff)<<24)|(((op>>8)&0x0ff)<<16)|(((op>>16)&0x0ff)<<8)|((op>>24)&0x0ff);
         } else if(base&0x080000){
           verilator_top->v__DOT__DUT__DOT__zeroriscy_i_sram__DOT__imem[addr/4+i] =
@@ -250,15 +250,15 @@ int main(int argc, char **argv, char **env) {
       int lb, tmp;
       int c;
       for(lb=0; lb<verilator_top->v__DOT__sd_sim__DOT__d_l; lb++){
-        tmp=verilator_top->v__DOT__DUT__DOT__zeroriscy_d_sram__DOT__dmem[(buffpointer+lb)/4];
+        tmp=verilator_top->v__DOT__DUT__DOT__zeroriscy_mem_bnn__DOT__ram0__DOT__mem[(buffpointer+lb)/4];
         if((c = fgetc(sd))==EOF){break;}
         if(lb%4==0){tmp&=0xffffff00;tmp|=c<<0;}
         if(lb%4==1){tmp&=0xffff00ff;tmp|=c<<8;}
         if(lb%4==2){tmp&=0xff00ffff;tmp|=c<<16;}
         if(lb%4==3){tmp&=0x00ffffff;tmp|=c<<24;}
-        verilator_top->v__DOT__DUT__DOT__zeroriscy_d_sram__DOT__dmem[(buffpointer+lb)/4]=tmp;
+        verilator_top->v__DOT__DUT__DOT__zeroriscy_mem_bnn__DOT__ram0__DOT__mem[(buffpointer+lb)/4]=tmp;
       }
-      verilator_top->v__DOT__DUT__DOT__zeroriscy_d_sram__DOT__dmem[sizepointer/4]=lb;
+      verilator_top->v__DOT__DUT__DOT__zeroriscy_mem_bnn__DOT__ram0__DOT__mem[sizepointer/4]=lb;
     }
     // if sd read size pointer
     if((verilator_top->v__DOT__sd_sim__DOT__req_l)&
@@ -300,6 +300,8 @@ int main(int argc, char **argv, char **env) {
     }
     // @(negedge clk)
     eval(verilator_top, tfp);
+
+    if(verilator_top->v__DOT__DUT__DOT__zeroriscy_core__DOT__instr_rdata_id==0x0000006f){break;} // finish @ self loop
   }
   delete verilator_top;
   tfp->close();
