@@ -22,16 +22,22 @@ FRESULT f_read (FIL* fp, void* buff, UINT btr, UINT* br){
   unsigned char *bufff=buff;
   int brn;
 
-  for(int p;p<btr;p+=512){
-    *SDBP = buf;
+  if(((int)buf&0xfff00000)==((int)buff&0xfff00000)){
+    *SDBP = buff;
     *SDSP = &brn;
-    if(btr-p>512){
-      *SDRS = 512;
-    }else{
-      *SDRS = btr-p;
-    }
-    for(int i=0;i<brn;i++){
-      bufff[p+i]=buf[i];
+    *SDRS = btr;
+  }else{
+    for(int p;p<btr;p+=512){
+      *SDBP = buf;
+      *SDSP = &brn;
+      if(btr-p>512){
+        *SDRS = 512;
+      }else{
+        *SDRS = btr-p;
+      }
+      for(int i=0;i<brn;i++){
+        bufff[p+i]=buf[i];
+      }
     }
   }
   return 0;
