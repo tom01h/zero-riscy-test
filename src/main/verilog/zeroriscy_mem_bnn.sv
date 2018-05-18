@@ -25,72 +25,88 @@ module zeroriscy_mem_bnn
    output logic        p_err
    );
 
+   logic               bnn_en_1;
+   logic [2:0]         com_1;
+   logic [1:0]         bs_1;
+   logic [9:0]         addr_1;
+   logic [31:0]        data_1;
+   wire                bnn_en = (b_req&p_gnt)|((com_1==3'd6)&~p_gnt);
+
    logic [31:0]        b_rdata;
-   logic [1023:0]      rdata;
-   logic [31:0]        cs_1;
-   always @(*)begin
+   logic [255:0]       rdata;
+   logic [7:0]         cs_1;
+   always_comb begin
       if(bnn_en_1)
         p_rdata[31:0] = b_rdata;
       else
-        p_rdata[31:0] = ({32{cs_1[0]}}  & rdata[32*31+31:32*31+0])|
-                        ({32{cs_1[1]}}  & rdata[32*30+31:32*30+0])|
-                        ({32{cs_1[2]}}  & rdata[32*29+31:32*29+0])|
-                        ({32{cs_1[3]}}  & rdata[32*28+31:32*28+0])|
-                        ({32{cs_1[4]}}  & rdata[32*27+31:32*27+0])|
-                        ({32{cs_1[5]}}  & rdata[32*26+31:32*26+0])|
-                        ({32{cs_1[6]}}  & rdata[32*25+31:32*25+0])|
-                        ({32{cs_1[7]}}  & rdata[32*24+31:32*24+0])|
-                        ({32{cs_1[8]}}  & rdata[32*23+31:32*23+0])|
-                        ({32{cs_1[9]}}  & rdata[32*22+31:32*22+0])|
-                        ({32{cs_1[10]}} & rdata[32*21+31:32*21+0])|
-                        ({32{cs_1[11]}} & rdata[32*20+31:32*20+0])|
-                        ({32{cs_1[12]}} & rdata[32*19+31:32*19+0])|
-                        ({32{cs_1[13]}} & rdata[32*18+31:32*18+0])|
-                        ({32{cs_1[14]}} & rdata[32*17+31:32*17+0])|
-                        ({32{cs_1[15]}} & rdata[32*16+31:32*16+0])|
-                        ({32{cs_1[16]}} & rdata[32*15+31:32*15+0])|
-                        ({32{cs_1[17]}} & rdata[32*14+31:32*14+0])|
-                        ({32{cs_1[18]}} & rdata[32*13+31:32*13+0])|
-                        ({32{cs_1[19]}} & rdata[32*12+31:32*12+0])|
-                        ({32{cs_1[20]}} & rdata[32*11+31:32*11+0])|
-                        ({32{cs_1[21]}} & rdata[32*10+31:32*10+0])|
-                        ({32{cs_1[22]}} & rdata[32*9 +31:32*9+0])|
-                        ({32{cs_1[23]}} & rdata[32*8 +31:32*8+0])|
-                        ({32{cs_1[24]}} & rdata[32*7 +31:32*7+0])|
-                        ({32{cs_1[25]}} & rdata[32*6 +31:32*6+0])|
-                        ({32{cs_1[26]}} & rdata[32*5 +31:32*5+0])|
-                        ({32{cs_1[27]}} & rdata[32*4 +31:32*4+0])|
-                        ({32{cs_1[28]}} & rdata[32*3 +31:32*3+0])|
-                        ({32{cs_1[29]}} & rdata[32*2 +31:32*2+0])|
-                        ({32{cs_1[30]}} & rdata[32*1 +31:32*1+0])|
-                        ({32{cs_1[31]}} & rdata[32*0 +31:32*0+0]);
+        p_rdata[31:0] = (({32{cs_1[0]}}  & rdata[32*7+31:32*7+0])|
+                         ({32{cs_1[1]}}  & rdata[32*6+31:32*6+0])|
+                         ({32{cs_1[2]}}  & rdata[32*5+31:32*5+0])|
+                         ({32{cs_1[3]}}  & rdata[32*4+31:32*4+0])|
+                         ({32{cs_1[4]}}  & rdata[32*3+31:32*3+0])|
+                         ({32{cs_1[5]}}  & rdata[32*2+31:32*2+0])|
+                         ({32{cs_1[6]}}  & rdata[32*1+31:32*1+0])|
+                         ({32{cs_1[7]}}  & rdata[32*0+31:32*0+0]) );
    end
 
-   logic [9:0]         ram_addr;
-   logic [31:0]        cs;
+   logic [11:0]        ram_addr;
+   logic [7:0]         cs;
    integer             i;
 
-   assign p_gnt = 1'b1;//TEMP//TEMP//
-   //output logic        p_rvalid,
+   logic [1:0]         cnt;
+   always_ff @(posedge clk)begin
+      if(rst_n==1'b0)begin
+         cnt<=2'd0;
+         p_gnt<=1'b1;
+         p_rvalid <= 0;
+      end else if(p_req&p_gnt)begin
+         p_rvalid <= 1;
+      end else if(b_req&p_gnt)begin
+         if(~(p_addr[12]&(p_addr[8]|(p_addr[3:2]!=2'b01))))begin // multi cycle ~(ini:seten:activ)
+            p_rvalid <= 1;
+            cnt<=2'd1;
+            p_gnt<=1'b0;
+         end else if(p_addr[12]&~p_addr[8]&(p_addr[3:2]==2'b11))begin // activ 1st
+            p_rvalid <= 0;
+            p_gnt <= 0;
+         end else begin // ini:seten
+            p_rvalid <= 1;
+         end
+      end else if((com_1==3'd6)&~p_gnt)begin // activ 2nd
+         p_rvalid <= 1;
+         p_gnt <= 1;
+      end else if(cnt!=2'd0)begin
+         p_rvalid <= 0;
+         cnt<=cnt+1;
+         if(cnt==2'd3)begin
+            p_gnt<=1'b1;
+         end
+      end else begin
+         p_rvalid <= 0;
+      end
+   end
 
-   always @(p_addr)begin
-      if(p_req)begin
-         ram_addr = p_addr[16:7];
-      end else if (b_req) begin
-         ram_addr = p_addr[11:2];
+   always_comb begin
+      if(p_req&p_gnt)begin
+         ram_addr = p_addr[16:5];
+      end else if(b_req&p_gnt)begin
+         ram_addr = {p_addr[11:2],2'b00};
+      end else if(cnt!=0)begin
+         ram_addr = {addr_1[9:0],cnt[1:0]};
       end else begin
          ram_addr = 10'hxx;
       end
+
       if(~p_gnt)begin
-         cs=32'h00000000;
+         cs=8'h00;
       end else if(p_req)begin
-         for(i=0;i<32;i=i+1)begin
-            cs[i]=(i==p_addr[6:2]);
+         for(i=0;i<8;i=i+1)begin
+            cs[i]=(i==p_addr[4:2]);
          end
       end else if(b_req&(p_addr[12]==0))begin
-         cs=32'hffffffff;
+         cs=8'hff;
       end else begin
-         cs=32'h00000000;
+         cs=8'h00;
       end
    end
 
@@ -103,42 +119,43 @@ module zeroriscy_mem_bnn
       .be(p_be),
       .din(p_wdata));
 
-   logic               bnn_en_1;
-   logic [2:0]         com_1;
-   logic [4:0]         addr_1;
-   logic [31:0]        data_1;
-   wire                bnn_en = b_req&p_gnt;
-
 // input stage
    always_ff @(posedge clk)begin
-      if(bnn_en)begin
+      if(cnt!=0)begin
+         bs_1 <= cnt;
+      end else if(bnn_en)begin
          bnn_en_1 <= 1'b1;
+         bs_1 <= cnt;
          data_1[31:0] <= p_wdata;
          if(~p_addr[12])begin
             com_1[2:0] <= {~p_be[1],~p_be[2],1'b1};
+            addr_1[9:0] <= p_addr[11:2];
          end else if(~p_addr[8])begin
             com_1[2:0] <= {p_addr[3:2],1'b0};
          end else begin
             com_1[2:0] <= 3'h4;
-            addr_1[3:0] <= p_addr[5:2];
+            addr_1[1:0] <= p_addr[3:2];
+            bs_1[1:0] <= p_addr[5:4];
          end
       end else begin
          bnn_en_1 <= 1'b0;
          com_1[2:0] <= 3'b101;
          if(p_req)begin
-            addr_1[4:0] <= p_addr[6:2];
-            cs_1[31:0] <= cs[31:0];
+            cs_1[7:0] <= cs[7:0];
+         end else begin
+            cs_1[7:0] <= 8'h00;
          end
       end
    end
 
-   genvar               g;
+   genvar              g;
    generate begin
-      for(g=0;g<32;g=g+1) begin : estimate_block
+      for(g=0;g<8;g=g+1) begin : estimate_block
          bnn_core core
-            (.clk(clk), .com_1(com_1[2:0]), .seten_1({(g=={addr_1[3:0],1'b0}),(g=={addr_1[3:0],1'b1})}),
-             .data_1(data_1[31:0]), .param(rdata[32*(31-g)+31:32*(31-g)+0]),
-             .activ(b_rdata[g])
+            (.clk(clk), .com_1(com_1[2:0]), .bs_1(bs_1),
+             .seten_1({(g=={addr_1[1:0],1'b0}),(g=={addr_1[1:0],1'b1})}),
+             .data_1(data_1[31:0]), .param(rdata[32*(7-g)+31:32*(7-g)+0]),
+             .activ({b_rdata[g+24],b_rdata[g+16],b_rdata[g+8],b_rdata[g]})
              );
       end : estimate_block
    end
@@ -148,26 +165,29 @@ endmodule
 
 module bnn_core
   (
-   input wire        clk,
-   input wire [2:0]  com_1,
-   input wire [1:0]  seten_1,
-   input wire [31:0] data_1,
-   input wire [31:0] param,
-   output wire       activ
+   input logic        clk,
+   input logic [2:0]  com_1,
+   input logic [1:0]  bs_1,
+   input logic [1:0]  seten_1,
+   input logic [31:0] data_1,
+   input logic [31:0] param,
+   output logic [3:0] activ
    );
 
-   integer           i;
+   integer            i;
 
-   reg signed [15:0] acc;
-   reg signed [15:0] pool;
+   logic signed [0:3] [15:0] acc;
+   logic signed [0:3] [15:0] pool;
 
-   reg [2:0]         com_2;
-   reg [31:0]        data_2;
-   reg [1:0]         seten_2;
+   logic [2:0]               com_2;
+   logic [1:0]               bs_2;
+   logic [31:0]              data_2;
+   logic [1:0]               seten_2;
 
 // 1st stage
    always_ff @(posedge clk)begin
       com_2[2:0] <= com_1;
+      bs_2[1:0]  <= bs_1;
       case(com_1)
         3'd0 : begin //ini
            data_2 <= data_1;
@@ -201,49 +221,58 @@ module bnn_core
    always_ff @(posedge clk)begin
       case(com_2)
         3'd0 : begin //ini
-           acc[15:0] <= data_2[15:0];
-           pool[15:0] <= 16'h8000;
+           acc[0][15:0] <= data_2[15:0];
+           acc[1][15:0] <= data_2[15:0];
+           acc[2][15:0] <= data_2[15:0];
+           acc[3][15:0] <= data_2[15:0];
+           pool[0][15:0] <= 16'h8000;
+           pool[1][15:0] <= 16'h8000;
+           pool[2][15:0] <= 16'h8000;
+           pool[3][15:0] <= 16'h8000;
         end
         3'd1 : begin //acc
-           acc <= acc + sum;
+           acc[bs_2][15:0] <= acc[bs_2][15:0] + sum[15:0];
         end
         3'd2 : begin //pool
-           if(acc>pool)begin
-              pool[15:0] <= acc[15:0];
+           if($signed(acc[bs_2][15:0])>$signed(pool[bs_2][15:0]))begin
+              pool[bs_2][15:0] <= acc[bs_2][15:0];
            end
-           acc[15:0] <= data_2[15:0];
+           acc[bs_2][15:0] <= data_2[15:0];
         end
         3'd3 : begin //norm
-           pool[15:0] <= {pool[15:0],3'h0} - data_2[15:0];
+           pool[bs_2][15:0] <= {pool[bs_2][12:0],3'h0} - data_2[15:0];
         end
         3'd4 : begin //seten
            if(seten_2==2'b10)
-             acc[15:0] <= data_2[31:16];
+             acc[bs_2][15:0] <= data_2[31:16];
            if(seten_2==2'b01)
-             acc[15:0] <= data_2[15:0];
+             acc[bs_2][15:0] <= data_2[15:0];
            if(seten_2==2'b11)
-             acc[15:0] <= 16'hxxxx;
+             acc[bs_2][15:0] <= 16'hxxxx;
         end
 //        3'd6 : begin //activ
 //           activ <= pool[15];
 //        end
         3'd7 : begin //norm8
-           pool[15:0] <= pool[15:0] - data_2[15:0];
+           pool[bs_2][15:0] <= pool[bs_2][15:0] - data_2[15:0];
         end
       endcase
    end
-   assign activ = pool[15];
+   assign activ[0] = pool[0][15];
+   assign activ[1] = pool[1][15];
+   assign activ[2] = pool[2][15];
+   assign activ[3] = pool[3][15];
 endmodule
 
 module bnn_ram
   (
-   input logic           clk,
-   input logic [9:0]     addr,
-   output logic [1023:0] dout,
-   input logic [31:0]    cs,
-   input logic           we,
-   input logic [3:0]     be,
-   input logic [31:0]    din
+   input logic          clk,
+   input logic [11:0]   addr,
+   output logic [255:0] dout,
+   input logic [7:0]    cs,
+   input logic          we,
+   input logic [3:0]    be,
+   input logic [31:0]   din
    );
 
    parameter nwords = 32*1024;  //128KB Data
@@ -252,55 +281,27 @@ module bnn_ram
 
    wire [31:0]           wmask = {{8{be[3]}},{8{be[2]}},{8{be[1]}},{8{be[0]}}};
 
-   logic [4:0]           oaddr;
-   assign oaddr[4] = (|cs[31:16]);
-   assign oaddr[3] = (|cs[31:24])|(|cs[15:8]);
-   assign oaddr[2] = (|cs[31:28])|(|cs[23:20])|(|cs[15:12])|(|cs[7:4]);
-   assign oaddr[1] = (|cs[31:30])|(|cs[27:26])|(|cs[23:22])|(|cs[19:18])|
-                     (|cs[15:14])|(|cs[11:10])|(|cs[7:6])  |(|cs[3:2]);
-   assign oaddr[0] = cs[31]|cs[29]|cs[27]|cs[25]|cs[23]|cs[21]|cs[19]|cs[17]|
-                     cs[15]|cs[13]|cs[11]|cs[9] |cs[7] |cs[5] |cs[3] |cs[1];
+   logic [2:0]           oaddr;
+   assign oaddr[2] = (|cs[7:4]);
+   assign oaddr[1] = (|cs[7:6])|(|cs[3:2]);
+   assign oaddr[0] = cs[7]|cs[5]|cs[3]|cs[1];
 
-   wire [14:0]           waddr = {addr[9:0],oaddr[4:0]};
+   wire [14:0]           waddr = {addr[11:0],oaddr[2:0]};
    always_ff @(posedge clk) begin
       if ((|cs)&we) begin
          mem[waddr] <= (mem[waddr] & ~wmask) | (din & wmask);
       end
    end
 
-   always @(posedge clk)
+   always_ff @(posedge clk)
      begin
-        dout[32*31+31:32*31+0] <= mem[{addr,5'd0}];
-        dout[32*30+31:32*30+0] <= mem[{addr,5'd1}];
-        dout[32*29+31:32*29+0] <= mem[{addr,5'd2}];
-        dout[32*28+31:32*28+0] <= mem[{addr,5'd3}];
-        dout[32*27+31:32*27+0] <= mem[{addr,5'd4}];
-        dout[32*26+31:32*26+0] <= mem[{addr,5'd5}];
-        dout[32*25+31:32*25+0] <= mem[{addr,5'd6}];
-        dout[32*24+31:32*24+0] <= mem[{addr,5'd7}];
-        dout[32*23+31:32*23+0] <= mem[{addr,5'd8}];
-        dout[32*22+31:32*22+0] <= mem[{addr,5'd9}];
-        dout[32*21+31:32*21+0] <= mem[{addr,5'd10}];
-        dout[32*20+31:32*20+0] <= mem[{addr,5'd11}];
-        dout[32*19+31:32*19+0] <= mem[{addr,5'd12}];
-        dout[32*18+31:32*18+0] <= mem[{addr,5'd13}];
-        dout[32*17+31:32*17+0] <= mem[{addr,5'd14}];
-        dout[32*16+31:32*16+0] <= mem[{addr,5'd15}];
-        dout[32*15+31:32*15+0] <= mem[{addr,5'd16}];
-        dout[32*14+31:32*14+0] <= mem[{addr,5'd17}];
-        dout[32*13+31:32*13+0] <= mem[{addr,5'd18}];
-        dout[32*12+31:32*12+0] <= mem[{addr,5'd19}];
-        dout[32*11+31:32*11+0] <= mem[{addr,5'd20}];
-        dout[32*10+31:32*10+0] <= mem[{addr,5'd21}];
-        dout[32*9 +31:32*9 +0] <= mem[{addr,5'd22}];
-        dout[32*8 +31:32*8 +0] <= mem[{addr,5'd23}];
-        dout[32*7 +31:32*7 +0] <= mem[{addr,5'd24}];
-        dout[32*6 +31:32*6 +0] <= mem[{addr,5'd25}];
-        dout[32*5 +31:32*5 +0] <= mem[{addr,5'd26}];
-        dout[32*4 +31:32*4 +0] <= mem[{addr,5'd27}];
-        dout[32*3 +31:32*3 +0] <= mem[{addr,5'd28}];
-        dout[32*2 +31:32*2 +0] <= mem[{addr,5'd29}];
-        dout[32*1 +31:32*1 +0] <= mem[{addr,5'd30}];
-        dout[32*0 +31:32*0 +0] <= mem[{addr,5'd31}];
+        dout[32*7+31:32*7+0] <= mem[{addr,3'd0}];
+        dout[32*6+31:32*6+0] <= mem[{addr,3'd1}];
+        dout[32*5+31:32*5+0] <= mem[{addr,3'd2}];
+        dout[32*4+31:32*4+0] <= mem[{addr,3'd3}];
+        dout[32*3+31:32*3+0] <= mem[{addr,3'd4}];
+        dout[32*2+31:32*2+0] <= mem[{addr,3'd5}];
+        dout[32*1+31:32*1+0] <= mem[{addr,3'd6}];
+        dout[32*0+31:32*0+0] <= mem[{addr,3'd7}];
      end
 endmodule

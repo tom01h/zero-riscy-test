@@ -35,6 +35,8 @@ module zeroriscy_xbar
    output [31:0] ds_addr,
    output [31:0] ds_wdata,
    input [31:0]  ds_rdata,
+   input         ds_gnt,
+   input         ds_rvalid,
    input         ds_err,
 
    output        ss_req,
@@ -65,10 +67,10 @@ module zeroriscy_xbar
 
    always @ (posedge clk)
      if(~resetn) im_req_l <= 3'b000;
-     else if(im_gnt) im_req_l <= im_reqi;
+     else if(im_gnt&((im_req_l==3'b000)|im_rvalid)) im_req_l <= im_reqi;
    always @ (posedge clk)
      if(~resetn) dm_req_l <= 3'b000;
-     else if(dm_gnt) dm_req_l <= dm_reqi;
+     else if(dm_gnt&((dm_req_l==3'b000)|dm_rvalid)) dm_req_l <= dm_reqi;
 
    assign is_we       = (~dm_reqi[0]) ? 1'b0    : dm_we;
    assign is_be       = (~dm_reqi[0]) ? 4'h0    : dm_be;
@@ -85,14 +87,23 @@ module zeroriscy_xbar
    assign ss_addr     = (~dm_reqi[2]) ? im_addr : dm_addr;
    assign ss_wdata    = (~dm_reqi[2]) ? 32'h0   : dm_wdata;
    
-   assign im_rdata  = (im_req_l[2]) ? ss_rdata : (im_req_l[1]) ? ds_rdata : is_rdata;
-   assign im_gnt    = (im_reqi[2]) ? (ss_gnt&~dm_reqi[2]) : ~|(im_reqi[1:0]& dm_reqi[1:0]);
-   assign im_rvalid =  |{im_req_l[2]&~dm_req_l[2]&ss_rvalid,(im_req_l[1:0]&~dm_req_l[1:0])};
+   assign im_rdata  = ((im_req_l[2]) ? ss_rdata :
+                       (im_req_l[1]) ? ds_rdata : is_rdata);
+   assign im_gnt    = ((im_reqi[2]) ? (ss_gnt&~dm_reqi[2]) :
+                       (im_reqi[1]) ? (ds_gnt&~dm_reqi[1]) :
+                       (im_reqi[0]) ?         ~dm_reqi[0]  : 1'b1);
+   assign im_rvalid =  im_req_l[2]&~dm_req_l[2]&ss_rvalid|
+                       im_req_l[1]&~dm_req_l[1]&ds_rvalid|
+                       im_req_l[0]&~dm_req_l[0];
    assign im_err    = (im_req_l[2]) ? ss_err   : (im_req_l[1]) ? ds_err   : is_err;
 
-   assign dm_rdata  = (dm_req_l[2]) ? ss_rdata : (dm_req_l[1]) ? ds_rdata : is_rdata;
-   assign dm_gnt    = (dm_reqi[2]) ? ss_gnt : 1'b1;
-   assign dm_rvalid =  |{dm_req_l[2]&ss_rvalid,dm_req_l[1:0]};
+   assign dm_rdata  = ((dm_req_l[2]) ? ss_rdata :
+                       (dm_req_l[1]) ? ds_rdata : is_rdata);
+   assign dm_gnt    = ((dm_reqi[2]) ? ss_gnt :
+                       (dm_reqi[1]) ? ds_gnt : 1'b1);
+   assign dm_rvalid =  dm_req_l[2]&ss_rvalid|
+                       dm_req_l[1]&ds_rvalid|
+                       dm_req_l[0];
    assign dm_err    = (dm_req_l[2]) ? ss_err   : (dm_req_l[1]) ? ds_err   : is_err;
    
 endmodule

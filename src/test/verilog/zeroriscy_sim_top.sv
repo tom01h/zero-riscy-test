@@ -79,6 +79,8 @@ module zeroriscy_sim_top
    logic [31:0] ds_addr;
    logic [31:0] ds_wdata;
    logic [31:0] ds_rdata;
+   logic        ds_gnt;
+   logic        ds_rvalid;
 
    // System interface
    logic        ss_req;
@@ -190,6 +192,8 @@ module zeroriscy_sim_top
       .ds_addr(ds_addr[31:0]),
       .ds_wdata(ds_wdata[31:0]),
       .ds_rdata(ds_rdata[31:0]),
+      .ds_gnt(ds_gnt),
+      .ds_rvalid(ds_rvalid),
       .ds_err(1'b0),
 
       .ss_req(ss_req),
@@ -215,8 +219,8 @@ module zeroriscy_sim_top
       .p_addr(ds_addr[31:0]),
       .p_wdata(ds_wdata[31:0]),
       .p_rdata(ds_rdata[31:0]),
-      .p_gnt(),
-      .p_rvalid(),
+      .p_gnt(ds_gnt),
+      .p_rvalid(ds_rvalid),
       .p_err()
    );
 
