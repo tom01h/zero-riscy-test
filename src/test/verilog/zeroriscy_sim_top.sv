@@ -207,9 +207,15 @@ module zeroriscy_sim_top
       .ss_err(1'b0)
    );
 
+   logic [11:0]  r_addr;
+   logic [255:0] r_dout;
+   logic [7:0]   r_cs;
+   logic         r_we;
+   logic [3:0]   r_be;
+   logic [31:0]  r_din;
+
    zeroriscy_mem_bnn zeroriscy_mem_bnn
-     (
-      .clk(clk),
+     (.clk(clk),
       .rst_n(~reset),
 
       .b_req(ds_req&({ds_addr[31:19],3'h0}==16'h8018)),//TEMP//TEMP//
@@ -221,7 +227,23 @@ module zeroriscy_sim_top
       .p_rdata(ds_rdata[31:0]),
       .p_gnt(ds_gnt),
       .p_rvalid(ds_rvalid),
-      .p_err()
+      .p_err(),
+      .r_addr(r_addr),
+      .r_dout(r_dout),
+      .r_cs(r_cs),
+      .r_we(r_we),
+      .r_be(r_be),
+      .r_din(r_din)
+   );
+
+   zeroriscy_d_sram zeroriscy_d_sram
+     (.clk(clk),
+      .addr(r_addr),
+      .dout(r_dout),
+      .cs(r_cs),
+      .we(r_we),
+      .be(r_be),
+      .din(r_din)
    );
 
    zeroriscy_i_sram zeroriscy_i_sram

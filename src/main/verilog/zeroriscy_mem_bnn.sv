@@ -22,7 +22,14 @@ module zeroriscy_mem_bnn
    output logic [31:0] p_rdata,
    output logic        p_gnt,
    output logic        p_rvalid,
-   output logic        p_err
+   output logic        p_err,
+
+   output logic [11:0] r_addr,
+   input logic [255:0] r_dout,
+   output logic [7:0]  r_cs,
+   output logic        r_we,
+   output logic [3:0]  r_be,
+   output logic [31:0] r_din
    );
 
    logic               bnn_en_1;
@@ -33,7 +40,7 @@ module zeroriscy_mem_bnn
    wire                bnn_en = (b_req&p_gnt)|((com_1==3'd6)&~p_gnt);
 
    logic [31:0]        b_rdata;
-   logic [255:0]       rdata;
+   wire [255:0]        rdata = r_dout;
    logic [7:0]         cs_1;
    always_comb begin
       if(bnn_en_1)
@@ -49,8 +56,6 @@ module zeroriscy_mem_bnn
                          ({32{cs_1[7]}}  & rdata[32*0+31:32*0+0]) );
    end
 
-   logic [11:0]        ram_addr;
-   logic [7:0]         cs;
    integer             i;
 
    logic [1:0]         cnt;
@@ -86,38 +91,32 @@ module zeroriscy_mem_bnn
       end
    end
 
+   assign r_we = p_we&p_req;
+   assign r_be = p_be;
+   assign r_din = p_wdata;
    always_comb begin
       if(p_req&p_gnt)begin
-         ram_addr = p_addr[16:5];
+         r_addr = p_addr[16:5];
       end else if(b_req&p_gnt)begin
-         ram_addr = {p_addr[11:2],2'b00};
+         r_addr = {p_addr[11:2],2'b00};
       end else if(cnt!=0)begin
-         ram_addr = {addr_1[9:0],cnt[1:0]};
+         r_addr = {addr_1[9:0],cnt[1:0]};
       end else begin
-         ram_addr = 10'hxx;
+         r_addr = 10'hxx;
       end
 
-      if(~p_gnt)begin
-         cs=8'h00;
-      end else if(p_req)begin
+      if(p_req&p_gnt)begin
          for(i=0;i<8;i=i+1)begin
-            cs[i]=(i==p_addr[4:2]);
+            r_cs[i]=(i==p_addr[4:2]);
          end
-      end else if(b_req&(p_addr[12]==0))begin
-         cs=8'hff;
+      end else if(b_req&p_gnt&(p_addr[12]==0))begin
+         r_cs=8'hff;
+      end else if((cnt!=0)&com_1[0])begin
+         r_cs=8'hff;
       end else begin
-         cs=8'h00;
+         r_cs=8'h00;
       end
    end
-
-   bnn_ram ram0
-     (.clk(clk),
-      .addr(ram_addr),
-      .dout(rdata),
-      .cs(cs),
-      .we(p_we&p_req),
-      .be(p_be),
-      .din(p_wdata));
 
 // input stage
    always_ff @(posedge clk)begin
@@ -141,7 +140,7 @@ module zeroriscy_mem_bnn
          bnn_en_1 <= 1'b0;
          com_1[2:0] <= 3'b101;
          if(p_req)begin
-            cs_1[7:0] <= cs[7:0];
+            cs_1[7:0] <= r_cs[7:0];
          end else begin
             cs_1[7:0] <= 8'h00;
          end
@@ -262,46 +261,4 @@ module bnn_core
    assign activ[1] = pool[1][15];
    assign activ[2] = pool[2][15];
    assign activ[3] = pool[3][15];
-endmodule
-
-module bnn_ram
-  (
-   input logic          clk,
-   input logic [11:0]   addr,
-   output logic [255:0] dout,
-   input logic [7:0]    cs,
-   input logic          we,
-   input logic [3:0]    be,
-   input logic [31:0]   din
-   );
-
-   parameter nwords = 32*1024;  //128KB Data
-
-   logic [31:0]          mem [nwords-1:0];
-
-   wire [31:0]           wmask = {{8{be[3]}},{8{be[2]}},{8{be[1]}},{8{be[0]}}};
-
-   logic [2:0]           oaddr;
-   assign oaddr[2] = (|cs[7:4]);
-   assign oaddr[1] = (|cs[7:6])|(|cs[3:2]);
-   assign oaddr[0] = cs[7]|cs[5]|cs[3]|cs[1];
-
-   wire [14:0]           waddr = {addr[11:0],oaddr[2:0]};
-   always_ff @(posedge clk) begin
-      if ((|cs)&we) begin
-         mem[waddr] <= (mem[waddr] & ~wmask) | (din & wmask);
-      end
-   end
-
-   always_ff @(posedge clk)
-     begin
-        dout[32*7+31:32*7+0] <= mem[{addr,3'd0}];
-        dout[32*6+31:32*6+0] <= mem[{addr,3'd1}];
-        dout[32*5+31:32*5+0] <= mem[{addr,3'd2}];
-        dout[32*4+31:32*4+0] <= mem[{addr,3'd3}];
-        dout[32*3+31:32*3+0] <= mem[{addr,3'd4}];
-        dout[32*2+31:32*2+0] <= mem[{addr,3'd5}];
-        dout[32*1+31:32*1+0] <= mem[{addr,3'd6}];
-        dout[32*0+31:32*0+0] <= mem[{addr,3'd7}];
-     end
 endmodule

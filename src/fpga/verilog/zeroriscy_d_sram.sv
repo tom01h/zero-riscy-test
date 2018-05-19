@@ -1,7 +1,7 @@
 module zeroriscy_d_sram
   (
    input         clk,
-   input         rst_n,
+   input         rst_n,//
 
    input         p_req,
    input         p_we,
@@ -9,9 +9,9 @@ module zeroriscy_d_sram
    input [31:0]  p_addr,
    input [31:0]  p_wdata,
    output [31:0] p_rdata,
-   output        p_gnt,
-   output        p_rvalid,
-   output        p_err
+   output        p_gnt,//
+   output        p_rvalid,//
+   output        p_err//
    );
 
    v_rams_d ram0 (.clk(clk),
@@ -38,14 +38,14 @@ module zeroriscy_d_sram
                   .din(p_wdata[31:24]),
                   .dout(p_rdata[31:24]));
 
-   reg           p_reg_req;
-   always_ff @(posedge clk) begin
-      p_reg_req <= p_req;
-   end
+   reg           p_reg_req;//
+   always_ff @(posedge clk) begin//
+      p_reg_req <= p_req;//
+   end//
 
-   assign p_gnt = 1'b1;
-   assign p_rvalid = p_reg_req;
-   assign p_err = 1'b0;
+   assign p_gnt = 1'b1;//
+   assign p_rvalid = p_reg_req;//
+   assign p_err = 1'b0;//
 
 endmodule
 
