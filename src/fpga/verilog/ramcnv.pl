@@ -1,12 +1,16 @@
 #! /usr/bin/perl
 
-open D0,">ram.data0";
-open D1,">ram.data1";
-open D2,">ram.data2";
-open D3,">ram.data3";
+open D0,">ram0.v";
+open D1,">ram1.v";
+open D2,">ram2.v";
+open D3,">ram3.v";
 
 $addro = 0;
 
+printf D0 "   reg [7:0]    ram [0:8*1024-1] = {\n";
+printf D1 "   reg [7:0]    ram [0:8*1024-1] = {\n";
+printf D2 "   reg [7:0]    ram [0:8*1024-1] = {\n";
+printf D3 "   reg [7:0]    ram [0:8*1024-1] = {\n";
 while(<>){
     $bc = substr($_, 1, 2);
     $addr = substr($_, 3, 4);
@@ -22,10 +26,11 @@ while(<>){
     $_ = substr($_, 9);
 
     for($i=$addro;$i<$addr;$i++){
-        printf D0 "00\n";
-        printf D1 "00\n";
-        printf D2 "00\n";
-        printf D3 "00\n";
+        printf D0 "8'h00,\n";
+        printf D1 "8'h00,\n";
+        printf D2 "8'h00,\n";
+        printf D3 "8'h00,\n";
+        $addre = $addro+$i;
         $addri = sprintf "%04x",($addro+$i);
         printf ";04$addri${type}00000000\n";
     }        
@@ -39,6 +44,7 @@ while(<>){
         $data3 = substr($_, 6, 2);
 
         $bc = "04";
+        $addre = $addr+$i;
         $addri = sprintf "%04x",$addr+$i;
         $addri =~ /(..)(..)/;
         $addr0 = $1;
@@ -48,11 +54,21 @@ while(<>){
 
 #        printf ":$bc$addri$type$data0$data1$data2$data3%02x\n",($cs%256);
 #        printf "$data0$data1$data2$data3\n";
-        printf D0 "$data0\n";
-        printf D1 "$data1\n";
-        printf D2 "$data2\n";
-        printf D3 "$data3\n";
+        printf D0 "8'h$data0,\n";
+        printf D1 "8'h$data1,\n";
+        printf D2 "8'h$data2,\n";
+        printf D3 "8'h$data3,\n";
 
         $_ = substr($_, 8);
     }
 }
+for($i=$addre;$i<8*1024-2;$i++){
+    printf D0 "8'h00,\n";
+    printf D1 "8'h00,\n";
+    printf D2 "8'h00,\n";
+    printf D3 "8'h00,\n";
+}
+printf D0 "8'h00};\n";
+printf D1 "8'h00};\n";
+printf D2 "8'h00};\n";
+printf D3 "8'h00};\n";

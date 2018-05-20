@@ -55,12 +55,11 @@ module v_rams_i0 (clk, we, addr, din, dout);
    input [12:0] addr;
    input [7:0] din;
    output [7:0] dout;
-   reg [7:0]    ram [0:8*1024-1];
+
    reg [7:0]    dout;
-   initial
-     begin
-        $readmemh("ram.data0",ram);
-     end
+
+   `include "ram0.v"
+
    always @(posedge clk)
      begin
         if (we)
@@ -75,12 +74,11 @@ module v_rams_i1 (clk, we, addr, din, dout);
    input [12:0] addr;
    input [7:0] din;
    output [7:0] dout;
-   reg [7:0]    ram [0:8*1024-1];
+
    reg [7:0]    dout;
-   initial
-     begin
-        $readmemh("ram.data1",ram);
-     end
+
+   `include "ram1.v"
+
    always @(posedge clk)
      begin
         if (we)
@@ -95,12 +93,11 @@ module v_rams_i2 (clk, we, addr, din, dout);
    input [12:0] addr;
    input [7:0] din;
    output [7:0] dout;
-   reg [7:0]    ram [0:8*1024-1];
+
    reg [7:0]    dout;
-   initial
-     begin
-        $readmemh("ram.data2",ram);
-     end
+
+   `include "ram2.v"
+
    always @(posedge clk)
      begin
         if (we)
@@ -115,12 +112,11 @@ module v_rams_i3 (clk, we, addr, din, dout);
    input [12:0] addr;
    input [7:0] din;
    output [7:0] dout;
-   reg [7:0]    ram [0:8*1024-1];
+
    reg [7:0]    dout;
-   initial
-     begin
-        $readmemh("ram.data3",ram);
-     end
+
+   `include "ram3.v"
+
    always @(posedge clk)
      begin
         if (we)
