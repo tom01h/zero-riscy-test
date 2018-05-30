@@ -14,29 +14,12 @@ module zeroriscy_i_sram
    output        p_err
    );
 
-   v_rams_i0 ram0 (.clk(clk),
-                   .we(p_req&p_we&p_be[0]),
-                   .addr({p_addr[19],p_addr[13:2]}),
-                   .din(p_wdata[7:0]),
-                   .dout(p_rdata[7:0]));
-
-   v_rams_i1 ram1 (.clk(clk),
-                   .we(p_req&p_we&p_be[1]),
-                   .addr({p_addr[19],p_addr[13:2]}),
-                   .din(p_wdata[15:8]),
-                   .dout(p_rdata[15:8]));
-
-   v_rams_i2 ram2 (.clk(clk),
-                   .we(p_req&p_we&p_be[2]),
-                   .addr({p_addr[19],p_addr[13:2]}),
-                   .din(p_wdata[23:16]),
-                   .dout(p_rdata[23:16]));
-
-   v_rams_i3 ram3 (.clk(clk),
-                   .we(p_req&p_we&p_be[3]),
-                   .addr({p_addr[19],p_addr[13:2]}),
-                   .din(p_wdata[31:24]),
-                   .dout(p_rdata[31:24]));
+   v_rams_i ram (.clk(clk),
+                 .en(p_req),
+                 .we({4{p_req&p_we}}&p_be),
+                 .addr({p_addr[19],p_addr[13:2]}),
+                 .din(p_wdata[31:0]),
+                 .dout(p_rdata[31:0]));
 
    reg           p_reg_req;
    always_ff @(posedge clk) begin
@@ -49,78 +32,30 @@ module zeroriscy_i_sram
 
 endmodule
 
-module v_rams_i0 (clk, we, addr, din, dout);
+module v_rams_i (clk, en, we, addr, din, dout);
    input clk;
-   input we;
+   input en;
+   input [3:0] we;
    input [12:0] addr;
-   input [7:0] din;
-   output [7:0] dout;
+   input [31:0] din;
+   output [31:0] dout;
 
-   reg [7:0]    dout;
+   reg [31:0]    dout;
 
-   `include "ram0.v"
+   `include "ram.v"
 
    always @(posedge clk)
-     begin
-        if (we)
-          ram[addr] <= din;
+     if (en) begin
         dout <= ram[addr];
      end
-endmodule
 
-module v_rams_i1 (clk, we, addr, din, dout);
-   input clk;
-   input we;
-   input [12:0] addr;
-   input [7:0] din;
-   output [7:0] dout;
-
-   reg [7:0]    dout;
-
-   `include "ram1.v"
-
-   always @(posedge clk)
-     begin
-        if (we)
-          ram[addr] <= din;
-        dout <= ram[addr];
-     end
-endmodule
-
-module v_rams_i2 (clk, we, addr, din, dout);
-   input clk;
-   input we;
-   input [12:0] addr;
-   input [7:0] din;
-   output [7:0] dout;
-
-   reg [7:0]    dout;
-
-   `include "ram2.v"
-
-   always @(posedge clk)
-     begin
-        if (we)
-          ram[addr] <= din;
-        dout <= ram[addr];
-     end
-endmodule
-
-module v_rams_i3 (clk, we, addr, din, dout);
-   input clk;
-   input we;
-   input [12:0] addr;
-   input [7:0] din;
-   output [7:0] dout;
-
-   reg [7:0]    dout;
-
-   `include "ram3.v"
-
-   always @(posedge clk)
-     begin
-        if (we)
-          ram[addr] <= din;
-        dout <= ram[addr];
-     end
+   generate
+      genvar i;
+      for (i = 0; i < 4 ; i = i+1) begin: byte_write
+         always @(posedge clk)
+           if (en)
+             if (we[i])
+               ram[addr][(i+1)*8-1:i*8] <= din[(i+1)*8-1:i*8];
+      end
+   endgenerate
 endmodule

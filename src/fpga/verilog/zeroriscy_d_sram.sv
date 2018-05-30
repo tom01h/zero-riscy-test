@@ -12,47 +12,41 @@ module zeroriscy_d_sram
    genvar              i;
    generate begin
       for(i=0;i<8;i=i+1) begin : ram_block
-         v_rams_d ram0 (.clk(clk),
-                        .we(cs[i]&we&be[0]),
-                        .addr(addr[11:0]),
-                        .din(din[7:0]),
-                        .dout(dout[7+32*(7-i):0+32*(7-i)]));
-
-         v_rams_d ram1 (.clk(clk),
-                        .we(cs[i]&we&be[1]),
-                        .addr(addr[11:0]),
-                        .din(din[15:8]),
-                        .dout(dout[15+32*(7-i):8+32*(7-i)]));
-
-         v_rams_d ram2 (.clk(clk),
-                        .we(cs[i]&we&be[2]),
-                        .addr(addr[11:0]),
-                        .din(din[23:16]),
-                        .dout(dout[23+32*(7-i):16+32*(7-i)]));
-
-         v_rams_d ram3 (.clk(clk),
-                        .we(cs[i]&we&be[3]),
-                        .addr(addr[11:0]),
-                        .din(din[31:24]),
-                        .dout(dout[31+32*(7-i):24+32*(7-i)]));
+         v_rams_d ram (.clk(clk),
+                       .en(cs[i]),
+                       .we({4{cs[i]&we}}&be),
+                       .addr(addr[11:0]),
+                       .din(din[31:0]),
+                       .dout(dout[31+32*(7-i):0+32*(7-i)]));
       end : ram_block
    end
    endgenerate
 
 endmodule
 
-module v_rams_d (clk, we, addr, din, dout);
+module v_rams_d (clk, en, we, addr, din, dout);
    input clk;
-   input we;
+   input en;
+   input [3:0] we;
    input [11:0] addr;
-   input [7:0] din;
-   output [7:0] dout;
-   reg [7:0]    ram [0:4*1024-1];
-   reg [7:0]    dout;
+   input [31:0] din;
+   output [31:0] dout;
+
+   reg [31:0]    ram [0:4*1024-1];
+   reg [31:0]    dout;
+
    always @(posedge clk)
-     begin
-        if (we)
-          ram[addr] <= din;
+     if (en) begin
         dout <= ram[addr];
      end
+
+   generate
+      genvar i;
+      for (i = 0; i < 4 ; i = i+1) begin: byte_write
+         always @(posedge clk)
+           if (en)
+             if (we[i])
+               ram[addr][(i+1)*8-1:i*8] <= din[(i+1)*8-1:i*8];
+      end
+   endgenerate
 endmodule
