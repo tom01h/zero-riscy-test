@@ -127,7 +127,7 @@ module zeroriscy_hex_tb();
                end else if(base[20:19]==2'b01)begin
                  DUT.zeroriscy_i_sram.imem[addr/4+i] = {op[7:0],op[15:8],op[23:16],op[31:24]};
                end else begin
-                 DUT.zeroriscy_d_sram.dmem[(base[16:0]+addr)/4+i] = {op[7:0],op[15:8],op[23:16],op[31:24]};
+                 DUT.zeroriscy_d_sram.mem[(base[16:0]+addr)/4+i] = {op[7:0],op[15:8],op[23:16],op[31:24]};
                end
                data = str;
             end
