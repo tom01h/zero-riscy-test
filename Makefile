@@ -129,9 +129,9 @@ $(OUT_DIR)/%.wlf: $(MEM_DIR)/%.ihex $(MODELSIM_DIR)/_vmake
 	mkdir -p output
 	cp $< loadmem.ihex
 	$(VSIM) $(VSIM_OPTS)
-	mv transcript $@.log
-	mv vsim.wlf $@
-	mv trace_core_00_0.log $@.trc
+	cp transcript $@.log
+	cp vsim.wlf $@
+	cp trace_core_00_0.log $@.trc
 
 $(SIM_DIR)/Vzeroriscy_verilator_top: $(VERILATOR_TOP) $(SIM_SRCS) $(CHIP_SRCS) $(DESIGN_SRCS) $(HDRS) $(VERILATOR_CPP_TB)
 	$(VERILATOR) $(VERILATOR_OPTS) $(VERILATOR_TOP) $(SIM_SRCS) $(CHIP_SRCS) $(DESIGN_SRCS) --exe ../$(VERILATOR_CPP_TB)

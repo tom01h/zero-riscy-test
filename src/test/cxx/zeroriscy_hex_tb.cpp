@@ -170,6 +170,7 @@ int main(int argc, char **argv, char **env) {
   fd = fopen("./loadmem.ihex","r");
   if( fd == NULL ){
     printf("ERROR!! loadmem.ihex not found\n");
+    system("stty echo -icanon min 1 time 0"); // Unix
     return -1;
   }
 
@@ -200,6 +201,7 @@ int main(int argc, char **argv, char **env) {
     }else{
       printf("ERROR!! Not support ihex format\n");
       printf("%s\n",str);
+      system("stty echo -icanon min 1 time 0"); // Unix
       return -1;
     }
   }
@@ -229,8 +231,9 @@ int main(int argc, char **argv, char **env) {
         (char)verilator_top->v__DOT__sd_sim__DOT__d_l;
       if(verilator_top->v__DOT__sd_sim__DOT__d_l==0){
         sd = fopen(filename,"r");
-        if( fd == NULL ){
+        if( sd == NULL ){
           printf("ERROR!! SD card file not found\n");
+          system("stty echo -icanon min 1 time 0"); // Unix
           return -1;
         }
       }
