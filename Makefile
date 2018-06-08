@@ -64,7 +64,7 @@ zeroriscy_id_stage.sv \
 zeroriscy_if_stage.sv \
 zeroriscy_load_store_unit.sv \
 zeroriscy_multdiv_fast.sv \
-zeroriscy_bnn.sv \
+zeroriscy_mmult.sv \
 zeroriscy_prefetch_buffer.sv \
 zeroriscy_register_file.sv \
 zeroriscy_tracer.sv \

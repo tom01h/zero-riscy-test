@@ -292,11 +292,11 @@
         <spirit:internalPortReference spirit:componentRef="sd_controller_fifo_axi_0" spirit:portRef="S_AXI_ACLK"/>
         <spirit:internalPortReference spirit:componentRef="axi_uartlite_0" spirit:portRef="s_axi_aclk"/>
         <spirit:internalPortReference spirit:componentRef="rst_clk_wiz_100M" spirit:portRef="slowest_sync_clk"/>
+        <spirit:internalPortReference spirit:componentRef="zeroriscy_sim_top_0" spirit:portRef="clk"/>
         <spirit:internalPortReference spirit:componentRef="zeroriscy_sim_top_0_axi_periph" spirit:portRef="ACLK"/>
         <spirit:internalPortReference spirit:componentRef="zeroriscy_sim_top_0_axi_periph" spirit:portRef="S00_ACLK"/>
         <spirit:internalPortReference spirit:componentRef="zeroriscy_sim_top_0_axi_periph" spirit:portRef="M00_ACLK"/>
         <spirit:internalPortReference spirit:componentRef="zeroriscy_sim_top_0_axi_periph" spirit:portRef="M01_ACLK"/>
-        <spirit:internalPortReference spirit:componentRef="zeroriscy_sim_top_0" spirit:portRef="clk"/>
       </spirit:adHocConnection>
       <spirit:adHocConnection>
         <spirit:name>sd_controller_fifo_axi_0_SDIO_CLK</spirit:name>

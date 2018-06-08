@@ -13,7 +13,7 @@ OBJDUMP = $(BINDIR)/$(ADDNAME)objdump
 RANLIB  = $(BINDIR)/$(ADDNAME)ranlib
 STRIP   = $(BINDIR)/$(ADDNAME)strip
 
-OBJS  = startup.o main.o bnn.o param.o
+OBJS  = startup.o main.o mmult.o param.o
 OBJS += lib.o
 ifeq ($(UART),ps7)
 OBJS += serial_ps7.o ff.o diskio.o
