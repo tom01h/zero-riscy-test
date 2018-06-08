@@ -230,7 +230,7 @@ int main(int argc, char **argv, char **env) {
       filename[verilator_top->v__DOT__sd_sim__DOT__addr_l - 32 + 7] =
         (char)verilator_top->v__DOT__sd_sim__DOT__d_l;
       if(verilator_top->v__DOT__sd_sim__DOT__d_l==0){
-        sd = fopen(filename,"r");
+        sd = fopen(filename,"rb");
         if( sd == NULL ){
           printf("ERROR!! SD card file not found\n");
           system("stty echo -icanon min 1 time 0"); // Unix
