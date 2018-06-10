@@ -5,7 +5,7 @@
 
 #include "paramb.h"
 
-extern int mmult32(int *,int *,int *,int *);
+extern int mmult27x32(int *,int *,int *,int *);
 volatile static int *INIT = 0x80181000;
 volatile static int *POOL = 0x80181004;
 volatile static int *ACTV = 0x8018100c;
@@ -123,7 +123,7 @@ void Conv(int ci, int yi, int xi, int in[yi+2][xi+2],
             int* addr0 = &in[0+(y+yy)][0+(x+xx)];
             int* addr1 = &in[1+(y+yy)][0+(x+xx)];
             int* addr2 = &in[2+(y+yy)][0+(x+xx)];
-            mmult32(addr0, addr1, addr2, SET);
+            mmult27x32(addr0, addr1, addr2, SET);
             *POOL = 0;
           }
         }
